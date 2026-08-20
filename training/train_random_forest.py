@@ -9,7 +9,9 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-corpus = json.load(open(os.path.join(BASE, "corpus-samples.json")))
+# Prefer the larger, more diverse training set; fall back to the test corpus.
+_train_path = os.path.join(BASE, "training", "train_data.json")
+corpus = json.load(open(_train_path if os.path.exists(_train_path) else os.path.join(BASE, "corpus-samples.json")))
 
 # ========== Feature extraction (same as neural net) ==========
 SEC_KW = ["secure","login","signin","verify","account","update","confirm","bank","paypal","password","credit","wallet","authenticate","security","alert","unusual","suspended","claim","bonus","airdrop","reward","restore","unlock","validate","recover","reset"]

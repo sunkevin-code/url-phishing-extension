@@ -415,7 +415,9 @@ class TinyNN:
 
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    corpus_path = os.path.join(base_dir, "corpus-samples.json")
+    # Prefer the larger, more diverse training set; fall back to the test corpus.
+    train_data_path = os.path.join(base_dir, "training", "train_data.json")
+    corpus_path = train_data_path if os.path.exists(train_data_path) else os.path.join(base_dir, "corpus-samples.json")
     output_path = os.path.join(base_dir, "lib", "ml_weights.json")
 
     print(f"Loading corpus samples from: {corpus_path}")
@@ -445,16 +447,18 @@ def main():
     legit_indices = [i for i, label in enumerate(y) if label == 0.0]
     print(f"  Phishing: {len(phishing_indices)}, Legitimate: {len(legit_indices)}")
 
-    # Ensure balance by undersampling
+    # Ensure balance by undersampling the majority class only
     min_count = min(len(phishing_indices), len(legit_indices))
     if len(phishing_indices) > min_count:
-        kept = set(random.sample(phishing_indices, min_count))
-        X = [X[i] for i in range(len(X)) if i in kept]
-        y = [y[i] for i in range(len(y)) if i in kept]
+        keep_phish = set(random.sample(phishing_indices, min_count))
+        keep_mask = [(y[i] == 0.0) or (i in keep_phish) for i in range(len(y))]
     elif len(legit_indices) > min_count:
-        kept = set(random.sample(legit_indices, min_count))
-        X = [X[i] for i in range(len(X)) if i in kept]
-        y = [y[i] for i in range(len(y)) if i in kept]
+        keep_legit = set(random.sample(legit_indices, min_count))
+        keep_mask = [(y[i] == 1.0) or (i in keep_legit) for i in range(len(y))]
+    else:
+        keep_mask = [True] * len(y)
+    X = [X[i] for i in range(len(X)) if keep_mask[i]]
+    y = [y[i] for i in range(len(y)) if keep_mask[i]]
     print(f"  After balancing: {len(X)} samples ({sum(y)} phishing)")
 
     # Shuffle
