@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -280,8 +280,8 @@
       <span>Phishing Detector</span>
     </div>
     <div class="actions">
-      <button id="btnScanNow">&#x1F50D; 立即扫描当前页</button>
-      <button id="btnOptions" class="btn-options">&#x2699;&#xFE0F; 设置</button>
+      <button id="btnScanNow">&#x1F50D; Scan Current Page</button>
+      <button id="btnOptions" class="btn-options">&#x2699;&#xFE0F; Settings</button>
     </div>
   </div>
 
@@ -289,68 +289,68 @@
     <div class="status-banner">
       <div id="statusDot" class="status-dot active"></div>
       <div class="status-text">
-        <strong>保护已激活</strong> &mdash; 实时检测钓鱼URL、页面内容和行为模式
+        <strong>Protection Active</strong> &mdash; Real-time detection of phishing URLs, page content and behavior patterns
       </div>
-      <div id="refreshInfo" class="refresh-info">刚刚更新</div>
+      <div id="refreshInfo" class="refresh-info">Just updated</div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card total">
         <div class="stat-icon">&#x1F4CA;</div>
         <div class="stat-num" id="cardTotal">0</div>
-        <div class="stat-label">总计检查</div>
+        <div class="stat-label">Total Checked</div>
       </div>
       <div class="stat-card safe">
         <div class="stat-icon">&#x2705;</div>
         <div class="stat-num" id="cardSafe">0</div>
-        <div class="stat-label">安全页面</div>
+        <div class="stat-label">Safe Pages</div>
       </div>
       <div class="stat-card warned">
         <div class="stat-icon">&#x26A0;&#xFE0F;</div>
         <div class="stat-num" id="cardWarned">0</div>
-        <div class="stat-label">已警告</div>
+        <div class="stat-label">Warned</div>
       </div>
       <div class="stat-card blocked">
         <div class="stat-icon">&#x1F6AB;</div>
         <div class="stat-num" id="cardBlocked">0</div>
-        <div class="stat-label">已拦截</div>
+        <div class="stat-label">Blocked</div>
       </div>
     </div>
 
     <div class="section-grid">
       <div class="panel">
-        <h3>&#x1F4C8; 风险分布</h3>
+        <h3>&#x1F4C8; Risk Distribution</h3>
         <div class="risk-bar-wrapper">
           <div id="barSafe" class="bar-safe" style="width: 60%;"></div>
           <div id="barWarned" class="bar-warned" style="width: 25%;"></div>
           <div id="barBlocked" class="bar-blocked" style="width: 15%;"></div>
         </div>
         <div class="risk-legend">
-          <span><span class="dot dot-safe"></span> 安全 <span id="legSafe">0</span></span>
-          <span><span class="dot dot-warn"></span> 警告 <span id="legWarned">0</span></span>
-          <span><span class="dot dot-block"></span> 拦截 <span id="legBlocked">0</span></span>
+          <span><span class="dot dot-safe"></span> Safe <span id="legSafe">0</span></span>
+          <span><span class="dot dot-warn"></span> Warned <span id="legWarned">0</span></span>
+          <span><span class="dot dot-block"></span> Blocked <span id="legBlocked">0</span></span>
         </div>
       </div>
 
       <div class="panel">
-        <h3>&#x1F3AF; 检测方法贡献</h3>
+        <h3>&#x1F3AF; Detection Method Contribution</h3>
         <div id="methodBreakdown" class="method-breakdown">
           <div class="method-row">
-            <span class="method-name">URL 特征</span>
+            <span class="method-name">URL Features</span>
             <div class="method-bar-bg">
               <div id="barUrl" class="method-bar-fill url" style="width: 0%;"></div>
             </div>
             <span id="cntUrl" class="method-count">0</span>
           </div>
           <div class="method-row">
-            <span class="method-name">页面特征</span>
+            <span class="method-name">Page Features</span>
             <div class="method-bar-bg">
               <div id="barPage" class="method-bar-fill page" style="width: 0%;"></div>
             </div>
             <span id="cntPage" class="method-count">0</span>
           </div>
           <div class="method-row">
-            <span class="method-name">行为特征</span>
+            <span class="method-name">Behavior Features</span>
             <div class="method-bar-bg">
               <div id="barBehavior" class="method-bar-fill behavior" style="width: 0%;"></div>
             </div>
@@ -362,39 +362,39 @@
 
     <div class="section-grid">
       <div class="panel">
-        <h3>&#x1F550; 最近检测到的威胁</h3>
+        <h3>&#x1F550; Recent Threats Detected</h3>
         <div id="threatList" class="threat-list">
           <div class="empty-state">
             <div class="empty-icon">&#x1F6E1;&#xFE0F;</div>
-            <p>暂无威胁记录</p>
-            <p style="font-size:11px;color:#bbb;margin-top:4px;">浏览网页开始检测</p>
+            <p>No threats recorded</p>
+            <p style="font-size:11px;color:#bbb;margin-top:4px;">Start browsing to detect threats</p>
           </div>
         </div>
       </div>
 
       <div class="panel">
-        <h3>&#x1F4A1; 检测引擎状态</h3>
+        <h3>&#x1F4A1; Detection Engine Status</h3>
         <div id="detectionHealth" class="detection-health">
           <div class="health-item">
             <div class="check-icon">&#x1F517;</div>
-            <div class="check-name">URL 检测</div>
-            <div id="healthUrl" class="check-status on">已启用</div>
+            <div class="check-name">URL Detection</div>
+            <div id="healthUrl" class="check-status on">Active</div>
           </div>
           <div class="health-item">
             <div class="check-icon">&#x1F4C4;</div>
-            <div class="check-name">页面检测</div>
-            <div id="healthPage" class="check-status on">已启用</div>
+            <div class="check-name">Page Detection</div>
+            <div id="healthPage" class="check-status on">Active</div>
           </div>
           <div class="health-item">
             <div class="check-icon">&#x1F504;</div>
-            <div class="check-name">行为检测</div>
-            <div id="healthBehavior" class="check-status on">已启用</div>
+            <div class="check-name">Behavior Detection</div>
+            <div id="healthBehavior" class="check-status on">Active</div>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;">
-          <div style="font-size:12px;color:#888;margin-bottom:6px;">最活跃规则</div>
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">Most Active Rules</div>
           <div id="topRules" class="rule-effect-list">
-            <span style="font-size:12px;color:#bbb;">正在收集数据...</span>
+            <span style="font-size:12px;color:#bbb;">Collecting data...</span>
           </div>
         </div>
       </div>

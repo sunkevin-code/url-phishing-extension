@@ -17,7 +17,7 @@ function withTimeout(promise, timeoutMs, fallback) {
 // ---------- Initialize ----------
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    setLoading("正在获取页面信息...");
+    setLoading("Getting page info...");
     const [tab] = await withTimeout(
       chrome.tabs.query({ active: true, currentWindow: true }),
       2500,
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("domainDisplay").textContent = currentDomain;
 
-    setLoading("正在检测 URL...");
+    setLoading("Checking URL...");
     const result = await withTimeout(
       chrome.runtime.sendMessage({
         type: "CHECK_URL",

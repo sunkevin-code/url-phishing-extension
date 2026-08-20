@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
 
@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>钓鱼检测器 - 设置</title>
+  <title>Phishing Detector - Settings</title>
 
   <style>
 
@@ -516,21 +516,21 @@
 
 <body>
 
-  <h1>⚙️ 钓鱼检测器设置</h1>
+  <h1>⚙️ Phishing Detector Settings</h1>
 
-  <!-- 检测设置 -->
+  <!-- Detection Settings -->
 
   <div class="section">
 
-    <h2>&#x1F50D; 基础检测设置</h2>
+    <h2>&#x1F50D; Basic Detection Settings</h2>
 
     <div class="toggle-item">
 
       <div class="info">
 
-        <div class="title">URL 特征检测</div>
+        <div class="title">URL Feature Detection</div>
 
-        <div class="desc">检测URL中的钓鱼特征，如IP直连、特殊符号、可疑域名等</div>
+        <div class="desc">Detect phishing features in URLs: IP-based hosts, special characters, suspicious domains, etc.</div>
 
       </div>
 
@@ -548,9 +548,9 @@
 
       <div class="info">
 
-        <div class="title">页面内容检测</div>
+        <div class="title">Page Content Detection</div>
 
-        <div class="desc">分析页面HTML内容，检测钓鱼表单、品牌模仿等</div>
+        <div class="desc">Analyze page HTML to detect phishing forms, brand imitation, etc.</div>
 
       </div>
 
@@ -568,9 +568,9 @@
 
       <div class="info">
 
-        <div class="title">行为特征检测</div>
+        <div class="title">Behavior Detection</div>
 
-        <div class="desc">检测页面重定向行为是否符合钓鱼特征</div>
+        <div class="desc">Detect redirect behavior matching phishing patterns</div>
 
       </div>
 
@@ -588,9 +588,9 @@
 
       <div class="info">
 
-        <div class="title">DOM 动态监控 <span class="section-badge badge-new">NEW</span></div>
+        <div class="title">DOM Monitoring <span class="section-badge badge-new">NEW</span></div>
 
-        <div class="desc">实时监控页面DOM变化，捕获动态注入的表单/iframe/脚本</div>
+        <div class="desc">Monitor live DOM changes and capture dynamically injected forms/iframes/scripts</div>
 
       </div>
 
@@ -608,9 +608,9 @@
 
       <div class="info">
 
-        <div class="title">SSL 证书检查 <span class="section-badge badge-new">NEW</span></div>
+        <div class="title">SSL Certificate Check <span class="section-badge badge-new">NEW</span></div>
 
-        <div class="desc">检测HTTP页面（非HTTPS），尤其是登录页面</div>
+        <div class="desc">Flag HTTP pages (non-HTTPS), especially login pages</div>
 
       </div>
 
@@ -628,9 +628,9 @@
 
       <div class="info">
 
-        <div class="title">显示通知</div>
+        <div class="title">Show Notifications</div>
 
-        <div class="desc">检测到风险时显示系统通知</div>
+        <div class="desc">Show a system notification when a risk is detected</div>
 
       </div>
 
@@ -648,9 +648,9 @@
 
       <div class="info">
 
-        <div class="title">自动拦截高风险页面</div>
+        <div class="title">Auto-Block High-Risk Pages</div>
 
-        <div class="desc">自动将高风险页面重定向到拦截页面</div>
+        <div class="desc">Automatically redirect high-risk pages to a block page</div>
 
       </div>
 
@@ -668,19 +668,19 @@
 
       <div class="info">
 
-        <div class="title">警告阈值</div>
+        <div class="title">Warning Threshold</div>
 
-        <div class="desc">达到什么风险等级时显示警告</div>
+        <div class="desc">Risk level at which a warning is shown</div>
 
       </div>
 
       <select id="warnThreshold">
 
-        <option value="low">低风险</option>
+        <option value="low">Low Risk</option>
 
-        <option value="medium" selected>中风险</option>
+        <option value="medium" selected>Medium Risk</option>
 
-        <option value="high">高风险</option>
+        <option value="high">High Risk</option>
 
       </select>
 
@@ -688,19 +688,19 @@
 
   </div>
 
-  <!-- AI / ML 检测 -->
+  <!-- AI / ML Detection -->
 
   <div class="section">
 
-    <h2>&#x1F9E0; AI/ML 智能检测 <span class="section-badge badge-ai">NEW</span></h2>
+    <h2>&#x1F9E0; AI/ML Smart Detection <span class="section-badge badge-ai">NEW</span></h2>
 
     <div class="toggle-item">
 
       <div class="info">
 
-        <div class="title">ML 神经网络检测 <span class="section-badge badge-ai">AI</span></div>
+        <div class="title">ML Neural Network Detection <span class="section-badge badge-ai">AI</span></div>
 
-        <div class="desc">轻量级神经网络（38→16→1），纯JS运行，无外部依赖。基于样本数据训练，自动学习钓鱼权重</div>
+        <div class="desc">Lightweight neural network (38→16→1), pure JS with no external dependencies. Trained on sample data to learn phishing weights automatically.</div>
 
       </div>
 
@@ -716,11 +716,11 @@
 
     <div class="info-box">
 
-      <strong>🧠 ML 模型信息：</strong> 38维特征输入 → 16神经元隐藏层 → 1维输出（Sigmoid）。<br>
+      <strong>🧠 ML Model Info:</strong> 38-dim feature input → 16-neuron hidden layer → 1-dim output (Sigmoid).<br>
 
-      使用真实钓鱼样本 + 合法域名生成训练集，自动学习最优权重组合。<br>
+      Trained on real phishing samples + legitimate domains to learn optimal weight combinations.<br>
 
-      模型在本地加载运行，不会发送任何数据到外部。
+      The model runs locally and never sends any data externally.
     </div>
 
   </div>
@@ -735,9 +735,9 @@
 
       <div class="info">
 
-        <div class="title">启用 Safe Browsing 检测 <span class="section-badge badge-api">P0</span></div>
+        <div class="title">Enable Safe Browsing Detection <span class="section-badge badge-api">P0</span></div>
 
-        <div class="desc">查询 Google Safe Browsing 数据库，匹配已知钓鱼/恶意网站</div>
+        <div class="desc">Query the Google Safe Browsing database to match known phishing/malicious sites</div>
 
       </div>
 
@@ -755,72 +755,72 @@
 
       <div class="api-input-group">
 
-        <input type="password" id="safeBrowsingApiKey" placeholder="输入你的 Google Safe Browsing API Key">
+        <input type="password" id="safeBrowsingApiKey" placeholder="Enter your Google Safe Browsing API Key">
 
         <button id="toggleSbKey" style="padding:8px 12px;background:#f0f0f0;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:12px;">&#x1F441;</button>
 
       </div>
 
-      <div id="sbApiStatus" class="api-status info">⏸ 需要 API Key 才能启用</div>
+      <div id="sbApiStatus" class="api-status info">⏸ API Key required to enable</div>
 
       <div class="info-box blue">
 
-        <strong>🔑 如何获取 API Key：</strong><br>
+        <strong>🔑 How to get an API Key:</strong><br>
 
-        1. 访问 <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
+        1. Visit <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
 
-        2. 创建或选择项目 → 启用 "Safe Browsing API"<br>
+        2. Create or select a project → enable "Safe Browsing API"<br>
 
-        3. 创建 API Key → 限制只用于 Safe Browsing API<br>
+        3. Create an API Key → restrict it to the Safe Browsing API<br>
 
-        4. 免费版每天 10,000 次查询，完全够用
+        4. Free tier includes 10,000 queries/day — plenty
       </div>
 
     </div>
 
   </div>
 
-  <!-- 白名单 & 黑名单 -->
+  <!-- Whitelist & Blacklist -->
 
   <div class="section">
 
-    <h2>&#x1F4CB; 名单管理</h2>
+    <h2>&#x1F4CB; List Management</h2>
 
     <div class="tabs">
 
-      <button class="tab active" data-tab="whitelist">✅ 白名单</button>
+      <button class="tab active" data-tab="whitelist">✅ Whitelist</button>
 
-      <button class="tab" data-tab="blacklist">⛔ 黑名单</button>
+      <button class="tab" data-tab="blacklist">⛔ Blacklist</button>
 
     </div>
 
-    <!-- 白名单 -->
+    <!-- Whitelist -->
 
     <div id="whitelistTab" class="list-section">
 
       <div class="list-input">
 
-        <input type="text" id="whitelistInput" placeholder="输入域名，如 example.com">
+        <input type="text" id="whitelistInput" placeholder="Enter a domain, e.g. example.com">
 
-        <button id="addWhitelist">添加</button>
+        <button id="addWhitelist">Add</button>
 
       </div>
 
       <div style="margin-bottom:8px;">
 
-        <button class="btn-import" id="importWhitelist">&#x1F4E5; 批量导入</button>
+        <button class="btn-import" id="importWhitelist">&#x1F4E5; Bulk Import</button>
 
-        <button class="btn-import" id="exportWhitelist">&#x1F4E4; 导出</button>
+        <button class="btn-import" id="exportWhitelist">&#x1F4E4; Export</button>
 
         <div id="importWhitelistArea" class="hidden">
 
-          <textarea id="whitelistBulkInput" placeholder="每行一个域名"></textarea>
+          <textarea id="whitelistBulkInput" placeholder="One domain per line"></textarea>
 
           <div class="import-actions">
 
-            <button class="btn-ok" id="confirmWhitelistImport">确认导入</button>
+            <button class="btn-ok" id="confirmWhitelistImport">Confirm Import</button>
 
-            <button class="btn-cancel" id="cancelWhitelistImport">取消</button>
+            <button class="btn-cancel" id="cancelWhitelistImport">Cancel</button>
 
           </div>
 
@@ -832,33 +832,33 @@
 
     </div>
 
-    <!-- 黑名单 -->
+    <!-- Blacklist -->
 
     <div id="blacklistTab" class="list-section hidden">
 
       <div class="list-input">
 
-        <input type="text" id="blacklistInput" placeholder="输入域名，如 phishing.com">
+        <input type="text" id="blacklistInput" placeholder="Enter a domain, e.g. phishing.com">
 
-        <button id="addBlacklist">添加</button>
+        <button id="addBlacklist">Add</button>
 
       </div>
 
       <div style="margin-bottom:8px;">
 
-        <button class="btn-import" id="importBlacklist">&#x1F4E5; 批量导入</button>
+        <button class="btn-import" id="importBlacklist">&#x1F4E5; Bulk Import</button>
 
-        <button class="btn-import" id="exportBlacklist">&#x1F4E4; 导出</button>
+        <button class="btn-import" id="exportBlacklist">&#x1F4E4; Export</button>
 
         <div id="importBlacklistArea" class="hidden">
 
-          <textarea id="blacklistBulkInput" placeholder="每行一个域名"></textarea>
+          <textarea id="blacklistBulkInput" placeholder="One domain per line"></textarea>
 
           <div class="import-actions">
 
-            <button class="btn-ok" id="confirmBlacklistImport">确认导入</button>
+            <button class="btn-ok" id="confirmBlacklistImport">Confirm Import</button>
 
-            <button class="btn-cancel" id="cancelBlacklistImport">取消</button>
+            <button class="btn-cancel" id="cancelBlacklistImport">Cancel</button>
 
           </div>
 
@@ -872,57 +872,57 @@
 
   </div>
 
-  <!-- 检测规则说明 -->
+  <!-- Detection Layers -->
 
   <div class="section">
 
-    <h2>&#x1F4D6; 检测层级说明</h2>
+    <h2>&#x1F4D6; Detection Layers</h2>
 
     <div style="font-size:13px;line-height:1.8;color:#555;">
 
-      <p><strong>5 层检测架构：</strong></p>
+      <p><strong>5-Layer Detection Architecture:</strong></p>
 
-      <p><strong>第1层 - URL特征规则</strong> (24条, 评分6-35/条)</p>
-
-      <ul style="padding-left:20px;margin-bottom:8px;">
-
-        <li>IP地址直连、@符号、多重协议、短链接、可疑TLD、品牌相似度、变体域名、IDN同形字 等</li>
-
-      </ul>
-
-      <p><strong>第2层 - 页面内容规则</strong> (12条, 评分5-20/条)</p>
+      <p><strong>Layer 1 - URL Feature Rules</strong> (24 rules, 6-35 pts each)</p>
 
       <ul style="padding-left:20px;margin-bottom:8px;">
 
-        <li>密码表单、外部表单提交、隐藏iframe、外部脚本、HTTPS检查 等</li>
+        <li>IP-based hosts, @ symbol, multiple protocols, short URLs, suspicious TLDs, brand similarity, typosquatting, IDN homographs, etc.</li>
 
       </ul>
 
-      <p><strong>第3层 - 行为规则</strong> (2条, 评分10-15/条)</p>
+      <p><strong>Layer 2 - Page Content Rules</strong> (12 rules, 5-20 pts each)</p>
 
       <ul style="padding-left:20px;margin-bottom:8px;">
 
-        <li>快速导航、跨域表单</li>
+        <li>Password forms, external form submission, hidden iframes, external scripts, HTTPS check, etc.</li>
 
       </ul>
 
-      <p><strong>第4层 - ML神经网络</strong> <span class="section-badge badge-ai" style="font-size:10px;padding:1px 6px;">NEW</span></p>
+      <p><strong>Layer 3 - Behavior Rules</strong> (2 rules, 10-15 pts each)</p>
 
       <ul style="padding-left:20px;margin-bottom:8px;">
 
-        <li>38维特征 → 16隐藏层 → 输出概率（最高贡献60分）</li>
+        <li>Rapid navigation, cross-domain forms</li>
 
       </ul>
 
-      <p><strong>第5层 - 外部API</strong> <span class="section-badge badge-api" style="font-size:10px;padding:1px 6px;">NEW</span></p>
+      <p><strong>Layer 4 - ML Neural Network</strong> <span class="section-badge badge-ai" style="font-size:10px;padding:1px 6px;">NEW</span></p>
 
       <ul style="padding-left:20px;margin-bottom:8px;">
 
-        <li>Google Safe Browsing（最高60分）、SSL证书检查（最高20分）</li>
+        <li>38-dim features → 16 hidden layer → output probability (up to 60 pts)</li>
 
       </ul>
 
-      <p style="margin-top:12px;"><strong>最终评级:</strong> ≥55分=高风险 | 28-54分=中风险 | 10-27分=低风险 | &lt;10分=安全</p>
+      <p><strong>Layer 5 - External APIs</strong> <span class="section-badge badge-api" style="font-size:10px;padding:1px 6px;">NEW</span></p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>Google Safe Browsing (up to 60 pts), SSL certificate check (up to 20 pts)</li>
+
+      </ul>
+
+      <p style="margin-top:12px;"><strong>Final Rating:</strong> ≥55 = High Risk | 28-54 = Medium Risk | 10-27 = Low Risk | &lt;10 = Safe</p>
 
     </div>
 
