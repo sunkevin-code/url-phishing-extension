@@ -38,6 +38,7 @@ tr:hover{background:#fafbff}
 .badge.url{background:#E3F2FD;color:#1565C0}
 .badge.page{background:#FCE4EC;color:#C62828}
 .badge.behavior{background:#FFF3E0;color:#E65100}
+.badge.type-badge{background:#EDE7F6;color:#4527A0;font-weight:600}
 .url-cell{max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-size:11px}
 .scroll{max-height:500px;overflow-y:auto}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:100}
@@ -101,10 +102,15 @@ Results come from the real <strong>DomainSet, whitelist, blacklist, and 17 detec
 </div>
 </div>
 </div>
+<div class="panel" id="typePanel" style="display:none">
+<h3 style="margin-bottom:12px;font-size:15px">&#x1F6E1;&#xFE0F; Detection Rate by Phishing Type</h3>
+<div class="scroll" style="max-height:400px"><table><thead><tr><th>Type</th><th>Total</th><th>Detected</th><th>Missed</th><th>Detection Rate</th></tr></thead>
+<tbody id="typeBreakdownBody"></tbody></table></div>
+</div>
 <div class="panel">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:15px">&#x1F4CB; Results</h3><div class="tabs" id="filterTabs"><button class="tab active" data-filter="all">All</button><button class="tab" data-filter="phish">Phishing</button><button class="tab" data-filter="benign">Benign</button><button class="tab" data-filter="tp">TP</button><button class="tab" data-filter="fp">FP</button><button class="tab" data-filter="fn">FN</button></div></div>
-<div class="scroll"><table><thead><tr><th>#</th><th>URL</th><th>Label</th><th>Score</th><th>Level</th><th>Result</th><th>Rules</th></tr></thead>
-<tbody id="resultsBody"><tr><td colspan="7" style="text-align:center;padding:40px;color:#999">Click "Quick Test" to call extension engine</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>#</th><th>URL</th><th>Label</th><th>Type</th><th>Score</th><th>Level</th><th>Result</th><th>Rules</th></tr></thead>
+<tbody id="resultsBody"><tr><td colspan="8" style="text-align:center;padding:40px;color:#999">Click "Quick Test" to call extension engine</td></tr></tbody></table></div>
 </div>
 </div>
 <div class="toast" id="toast"></div>

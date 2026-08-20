@@ -36,10 +36,92 @@
     document.getElementById("statusBar").textContent = msg;
   }
 
+  // ============================================================
+  // Phishing Type Classification
+  // Classifies each URL into a phishing technique category based on
+  // URL features, so the test runner can report per-type detection rates.
+  // ============================================================
+
+  var PHISHING_TYPE_LABELS = {
+    "ip-based": "IP Address",
+    "at-symbol": "@ Symbol",
+    "double-protocol": "Double Protocol",
+    "data-uri": "Data URI",
+    "punycode": "Punycode",
+    "shortened": "Shortened URL",
+    "brand-impersonation": "Brand Impersonation",
+    "free-tld": "Free TLD",
+    "suspicious-tld": "Suspicious TLD",
+    "hosting-platform": "Hosting Platform",
+    "login-phishing": "Login Phishing",
+    "random-domain": "Random Domain",
+    "other": "Other",
+    "invalid": "Invalid"
+  };
+
+  var TYPE_BRANDS = ["google","facebook","youtube","paypal","amazon","netflix","microsoft","apple","icloud","instagram","twitter","whatsapp","telegram","discord","tiktok","linkedin","github","spotify","steam","alipay","weixin","baidu","ebay","yahoo","dropbox","adobe","shopify","stripe","chase","wellsfargo","bankofamerica","venmo","binance","coinbase","metamask","opensea","trustwallet","trezor","uphold","robinhood","chainlink","ledger","iphone"];
+  var TYPE_SHORTENERS = ["bit.ly","tinyurl.com","goo.gl","ow.ly","is.gd","buff.ly","t.co","rebrand.ly","cutt.ly","shorturl.at","tiny.cc","bl.ink","rb.gy","short.link","s.id","2.gp","v.gd","0x0.st","short.cm"];
+  var TYPE_FREE_TLDS = ["tk","ml","ga","cf","gq"];
+  var TYPE_SUS_TLDS = ["xyz","top","work","date","men","loan","click","download","review","trade","bid","win","party","stream","racing","accountant","science","cyou","monster","quest","lol","shop","dev","cfd","live","ren"];
+  var TYPE_HOSTING = ["wixstudio.com","wixsite.com","myshopify.com","wordpress.com","blogspot","weebly.com","webflow.io","squarespace.com","strikingly.com","site123.me","godaddysites.com","yolasite.com","000webhostapp.com","netlify.app","vercel.app","github.io","pages.dev","firebaseapp.com","azurewebsites.net","herokuapp.com","fly.dev","railway.app","onrender.com","glitch.me","replit.app","surge.sh","pineapple.page","qzz.io"];
+
+  function _typeLev(a, b) {
+    var m = a.length, n = b.length, dp = [];
+    for (var i = 0; i <= m; i++) { dp[i] = [i]; for (var j = 0; j <= n; j++) { if (i === 0) dp[i][j] = j; else if (j > 0) { dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]); } } }
+    return dp[m][n];
+  }
+
+  function _typeEnt(s) {
+    var f = {}, i, e = 0;
+    for (i = 0; i < s.length; i++) { var c = s[i]; f[c] = (f[c] || 0) + 1; }
+    var l = s.length;
+    for (var k in f) { var p = f[k] / l; e -= p * Math.log2(p); }
+    return e;
+  }
+
+  function classifyPhishingType(url) {
+    try {
+      var u = new URL(url), h = u.hostname.toLowerCase(), full = url.toLowerCase();
+      var noWWW = h.replace(/^www\./, "");
+      var parts = noWWW.split(".");
+      var main = parts[0];
+      var tld = parts[parts.length - 1];
+
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return "ip-based";
+      if (full.indexOf("@") > -1) return "at-symbol";
+      if (/https?:\/\/.*https?:\/\//i.test(full)) return "double-protocol";
+      if (full.indexOf("data:text/html") === 0 || full.indexOf("data:application") === 0) return "data-uri";
+      if (h.indexOf("xn--") > -1 || /[^\x00-\x7F]/.test(h)) return "punycode";
+      if (TYPE_SHORTENERS.indexOf(noWWW) > -1) return "shortened";
+
+      // Brand impersonation: typosquatting, embedded brand, or brand-as-subdomain
+      for (var i = 0; i < TYPE_BRANDS.length; i++) {
+        var b = TYPE_BRANDS[i];
+        if (main === b) continue;
+        if (main.length === b.length && _typeLev(main, b) === 1) return "brand-impersonation";
+        var flatMain = main.replace(/-/g, "");
+        if (flatMain.indexOf(b) > -1 && b.length >= 4 && flatMain.length > b.length) return "brand-impersonation";
+        for (var j = 0; j < parts.length - 1; j++) { if (parts[j] === b) return "brand-impersonation"; }
+      }
+
+      if (TYPE_FREE_TLDS.indexOf(tld) > -1) return "free-tld";
+      if (TYPE_SUS_TLDS.indexOf(tld) > -1) return "suspicious-tld";
+
+      for (var k = 0; k < TYPE_HOSTING.length; k++) {
+        if (TYPE_HOSTING[k] === "blogspot") { if (h.indexOf(".blogspot.") > -1) return "hosting-platform"; }
+        else if (h.indexOf("." + TYPE_HOSTING[k]) > -1) return "hosting-platform";
+      }
+
+      if (/login|signin|verify|secure|account|password|wallet|confirm|update/.test(full)) return "login-phishing";
+      if (main.length >= 12 && _typeEnt(main) > 3.5) return "random-domain";
+      return "other";
+    } catch (e) { return "invalid"; }
+  }
+
   function buildList(ph, bn) {
     var l = [];
-    for (var i = 0; i < ph.length; i++) l.push({ url: ph[i], label: "phishing" });
-    for (var i = 0; i < bn.length; i++) l.push({ url: bn[i], label: "benign" });
+    for (var i = 0; i < ph.length; i++) l.push({ url: ph[i], label: "phishing", type: classifyPhishingType(ph[i]) });
+    for (var i = 0; i < bn.length; i++) l.push({ url: bn[i], label: "benign", type: "benign" });
     return l;
   }
 
@@ -64,6 +146,7 @@
     chrome.runtime.sendMessage({ type: "CHECK_URL", url: item.url, tabId: -1 }).then(function(r) {
       r = r || {};
       r.label = item.label;
+      r.type = item.type || "other";
       r.index = idx + 1;
       r.url = item.url;
       testResults.push(r);
@@ -76,7 +159,7 @@
       runBatch(all, idx + 1);
     }).catch(function(e) {
       console.error("[TestRunner] Error:", e);
-      testResults.push({ url: item.url, label: item.label, index: idx + 1, score: 0, level: "safe", detectedRules: [], error: String(e) });
+      testResults.push({ url: item.url, label: item.label, type: item.type || "other", index: idx + 1, score: 0, level: "safe", detectedRules: [], error: String(e) });
       runBatch(all, idx + 1);
     });
   }
@@ -122,7 +205,9 @@
     document.getElementById("mFPR").textContent = "0%";
     document.getElementById("mF1").textContent = "0%";
     document.getElementById("cmPanel").style.display = "none";
-    document.getElementById("resultsBody").innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999">Click "Quick Test" to call extension engine</td></tr>';
+    var tp = document.getElementById("typePanel");
+    if (tp) tp.style.display = "none";
+    document.getElementById("resultsBody").innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#999">Click "Quick Test" to call extension engine</td></tr>';
     document.getElementById("statusBar").textContent = "Ready";
   }
 
@@ -156,7 +241,7 @@
     var tbody = document.getElementById("resultsBody");
     tbody.innerHTML = "";
     if (!testResults.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999">No results</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#999">No results</td></tr>';
       return;
     }
     var labels = { high: "HIGH", medium: "MEDIUM", low: "LOW", safe: "SAFE" };
@@ -174,16 +259,57 @@
       }
       if (r.error) rh = '<span style="color:#F44336;font-size:10px">ERR:' + r.error + '</span>';
       var us = (r.url || "").length > 70 ? (r.url || "").substring(0, 70) + "..." : (r.url || "");
+      var typeLabel = r.label === "phishing" ? (PHISHING_TYPE_LABELS[r.type] || r.type || "Other") : "-";
       tbody.innerHTML += '<tr data-label="' + r.label + '" data-result="' + rc + '">' +
         '<td>' + (r.index || i + 1) + '</td>' +
         '<td class="url-cell" title="' + (r.url || "").replace(/"/g, "&quot;") + '">' + us + '</td>' +
         '<td><span class="badge ' + (r.label === "phishing" ? "phish" : "benign") + '">' + r.label.toUpperCase() + '</span></td>' +
+        '<td><span class="badge type-badge">' + typeLabel + '</span></td>' +
         '<td style="font-weight:600">' + (r.score || 0) + '</td>' +
         '<td><span class="badge ' + (r.level || "safe") + '">' + (labels[r.level] || "SAFE") + '</span></td>' +
         '<td><span class="badge ' + rc + '">' + rc.toUpperCase() + '</span></td>' +
         '<td>' + rh + '</td></tr>';
     }
     filterResults("all");
+    renderTypeBreakdown();
+  }
+
+  function renderTypeBreakdown() {
+    var ph = testResults.filter(function(r) { return r.label === "phishing"; });
+    var byType = {};
+    for (var i = 0; i < ph.length; i++) {
+      var t = ph[i].type || "other";
+      if (!byType[t]) byType[t] = { total: 0, detected: 0 };
+      byType[t].total++;
+      if (ph[i].level && ph[i].level !== "safe") byType[t].detected++;
+    }
+    var keys = Object.keys(byType).sort(function(a, b) { return byType[b].total - byType[a].total; });
+    var tbody = document.getElementById("typeBreakdownBody");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (keys.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">No phishing samples</td></tr>';
+      return;
+    }
+    var totalDetected = 0, totalAll = 0;
+    for (var k = 0; k < keys.length; k++) {
+      var t = keys[k];
+      var st = byType[t];
+      var rate = st.total > 0 ? (st.detected / st.total * 100) : 0;
+      totalDetected += st.detected; totalAll += st.total;
+      var rateColor = rate >= 90 ? "#4CAF50" : rate >= 60 ? "#FF9800" : "#F44336";
+      tbody.innerHTML += '<tr>' +
+        '<td><span class="badge type-badge">' + (PHISHING_TYPE_LABELS[t] || t) + '</span></td>' +
+        '<td>' + st.total + '</td>' +
+        '<td>' + st.detected + '</td>' +
+        '<td>' + (st.total - st.detected) + '</td>' +
+        '<td style="font-weight:700;color:' + rateColor + '">' + rate.toFixed(1) + '%</td></tr>';
+    }
+    var overallRate = totalAll > 0 ? (totalDetected / totalAll * 100) : 0;
+    tbody.innerHTML += '<tr style="border-top:2px solid #e0e0e0;font-weight:700">' +
+      '<td>Overall</td><td>' + totalAll + '</td><td>' + totalDetected + '</td><td>' + (totalAll - totalDetected) + '</td>' +
+      '<td style="color:#667eea">' + overallRate.toFixed(1) + '%</td></tr>';
+    document.getElementById("typePanel").style.display = "block";
   }
 
   var curFilter = "all";
