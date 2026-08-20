@@ -1,0 +1,4 @@
+{
+  "extName": { "message": "URL Phishing Detector" },
+  "extDesc": { "message": "Detect phishing websites by analyzing URLs, page content, and behavioral patterns" }
+}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Phishing Detector</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    .top-bar {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .top-bar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+    .top-bar .brand .shield { font-size: 24px; }
+    .top-bar .actions {
+      display: flex;
+      gap: 8px;
+    }
+    .top-bar .actions button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #555;
+    }
+    .top-bar .actions button:hover {
+      background: #f5f5f5;
+      border-color: #bbb;
+    }
+    .top-bar .actions .btn-options {
+      background: #667eea;
+      color: #fff;
+      border-color: #667eea;
+    }
+    .top-bar .actions .btn-options:hover {
+      background: #5a6fd6;
+    }
+    .main-container {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 24px;
+    }
+    .status-banner {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .status-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: statusPulse 2s infinite;
+    }
+    .status-dot.active { background: #4CAF50; }
+    .status-dot.inactive { background: #F44336; }
+    @keyframes statusPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
+    }
+    .status-text { font-size: 14px; color: #555; }
+    .status-text strong { color: #333; }
+    .refresh-info { margin-left: auto; font-size: 12px; color: #999; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-card .stat-icon { font-size: 28px; margin-bottom: 8px; }
+    .stat-card .stat-num { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .stat-card .stat-label { font-size: 13px; color: #888; }
+    .stat-card.total .stat-num { color: #667eea; }
+    .stat-card.safe .stat-num { color: #4CAF50; }
+    .stat-card.warned .stat-num { color: #FF9800; }
+    .stat-card.blocked .stat-num { color: #F44336; }
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .panel h3 {
+      font-size: 15px;
+      margin-bottom: 16px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .risk-bar-wrapper {
+      display: flex;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .risk-bar-wrapper .bar-safe { background: #4CAF50; transition: width 0.5s; }
+    .risk-bar-wrapper .bar-warned { background: #FF9800; transition: width 0.5s; }
+    .risk-bar-wrapper .bar-blocked { background: #F44336; transition: width 0.5s; }
+    .risk-legend {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+    .risk-legend span { display: flex; align-items: center; gap: 4px; }
+    .risk-legend .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-safe { background: #4CAF50; }
+    .dot-warn { background: #FF9800; }
+    .dot-block { background: #F44336; }
+    .method-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .method-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .method-row .method-name { width: 90px; color: #666; flex-shrink: 0; }
+    .method-row .method-bar-bg {
+      flex: 1;
+      height: 18px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .method-row .method-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+    .method-row .method-bar-fill.url { background: #667eea; }
+    .method-row .method-bar-fill.page { background: #e91e63; }
+    .method-row .method-bar-fill.behavior { background: #FF9800; }
+    .method-row .method-count {
+      width: 40px;
+      text-align: right;
+      font-weight: 600;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .threat-list {
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .threat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      border: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+    .threat-item:hover { background: #fafafa; }
+    .threat-item.high { border-left: 3px solid #F44336; }
+    .threat-item.medium { border-left: 3px solid #FF9800; }
+    .threat-item.low { border-left: 3px solid #2196F3; }
+    .threat-item .threat-domain {
+      flex: 1;
+      font-size: 13px;
+      font-family: monospace;
+      word-break: break-all;
+      color: #333;
+    }
+    .threat-item .threat-level {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .threat-item .threat-level.high { background: #FFEBEE; color: #C62828; }
+    .threat-item .threat-level.medium { background: #FFF3E0; color: #E65100; }
+    .threat-item .threat-level.low { background: #E3F2FD; color: #1565C0; }
+    .threat-item .threat-time {
+      font-size: 11px;
+      color: #999;
+      flex-shrink: 0;
+      width: 80px;
+      text-align: right;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+    .detection-health {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .health-item {
+      text-align: center;
+      padding: 12px;
+    }
+    .health-item .check-icon { font-size: 24px; margin-bottom: 6px; }
+    .health-item .check-name { font-size: 12px; color: #888; margin-bottom: 4px; }
+    .health-item .check-status { font-size: 12px; font-weight: 600; }
+    .health-item .check-status.on { color: #4CAF50; }
+    .health-item .check-status.off { color: #F44336; }
+    .rule-effect-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .rule-effect-tag {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .rule-effect-tag.url { background: #E8EAF6; color: #283593; }
+    .rule-effect-tag.page { background: #FCE4EC; color: #880E4F; }
+    .rule-effect-tag.behavior { background: #FFF3E0; color: #E65100; }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-grid { grid-template-columns: 1fr; }
+      .detection-health { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="brand">
+      <span class="shield">&#x1F6E1;&#xFE0F;</span>
+      <span>Phishing Detector</span>
+    </div>
+    <div class="actions">
+      <button id="btnScanNow">&#x1F50D; 立即扫描当前页</button>
+      <button id="btnOptions" class="btn-options">&#x2699;&#xFE0F; 设置</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="status-banner">
+      <div id="statusDot" class="status-dot active"></div>
+      <div class="status-text">
+        <strong>保护已激活</strong> &mdash; 实时检测钓鱼URL、页面内容和行为模式
+      </div>
+      <div id="refreshInfo" class="refresh-info">刚刚更新</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon">&#x1F4CA;</div>
+        <div class="stat-num" id="cardTotal">0</div>
+        <div class="stat-label">总计检查</div>
+      </div>
+      <div class="stat-card safe">
+        <div class="stat-icon">&#x2705;</div>
+        <div class="stat-num" id="cardSafe">0</div>
+        <div class="stat-label">安全页面</div>
+      </div>
+      <div class="stat-card warned">
+        <div class="stat-icon">&#x26A0;&#xFE0F;</div>
+        <div class="stat-num" id="cardWarned">0</div>
+        <div class="stat-label">已警告</div>
+      </div>
+      <div class="stat-card blocked">
+        <div class="stat-icon">&#x1F6AB;</div>
+        <div class="stat-num" id="cardBlocked">0</div>
+        <div class="stat-label">已拦截</div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="panel">
+        <h3>&#x1F4C8; 风险分布</h3>
+        <div class="risk-bar-wrapper">
+          <div id="barSafe" class="bar-safe" style="width: 60%;"></div>
+          <div id="barWarned" class="bar-warned" style="width: 25%;"></div>
+          <div id="barBlocked" class="bar-blocked" style="width: 15%;"></div>
+        </div>
+        <div class="risk-legend">
+          <span><span class="dot dot-safe"></span> 安全 <span id="legSafe">0</span></span>
+          <span><span class="dot dot-warn"></span> 警告 <span id="legWarned">0</span></span>
+          <span><span class="dot dot-block"></span> 拦截 <span id="legBlocked">0</span></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>&#x1F3AF; 检测方法贡献</h3>
+        <div id="methodBreakdown" class="method-breakdown">
+          <div class="method-row">
+            <span class="method-name">URL 特征</span>
+            <div class="method-bar-bg">
+              <div id="barUrl" class="method-bar-fill url" style="width: 0%;"></div>
+            </div>
+            <span id="cntUrl" class="method-count">0</span>
+          </div>
+          <div class="method-row">
+            <span class="method-name">页面特征</span>
+            <div class="method-bar-bg">
+              <div id="barPage" class="method-bar-fill page" style="width: 0%;"></div>
+            </div>
+            <span id="cntPage" class="method-count">0</span>
+          </div>
+          <div class="method-row">
+            <span class="method-name">行为特征</span>
+            <div class="method-bar-bg">
+              <div id="barBehavior" class="method-bar-fill behavior" style="width: 0%;"></div>
+            </div>
+            <span id="cntBehavior" class="method-count">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="panel">
+        <h3>&#x1F550; 最近检测到的威胁</h3>
+        <div id="threatList" class="threat-list">
+          <div class="empty-state">
+            <div class="empty-icon">&#x1F6E1;&#xFE0F;</div>
+            <p>暂无威胁记录</p>
+            <p style="font-size:11px;color:#bbb;margin-top:4px;">浏览网页开始检测</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>&#x1F4A1; 检测引擎状态</h3>
+        <div id="detectionHealth" class="detection-health">
+          <div class="health-item">
+            <div class="check-icon">&#x1F517;</div>
+            <div class="check-name">URL 检测</div>
+            <div id="healthUrl" class="check-status on">已启用</div>
+          </div>
+          <div class="health-item">
+            <div class="check-icon">&#x1F4C4;</div>
+            <div class="check-name">页面检测</div>
+            <div id="healthPage" class="check-status on">已启用</div>
+          </div>
+          <div class="health-item">
+            <div class="check-icon">&#x1F504;</div>
+            <div class="check-name">行为检测</div>
+            <div id="healthBehavior" class="check-status on">已启用</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;">
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">最活跃规则</div>
+          <div id="topRules" class="rule-effect-list">
+            <span style="font-size:12px;color:#bbb;">正在收集数据...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

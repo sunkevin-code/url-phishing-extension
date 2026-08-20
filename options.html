@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>钓鱼检测器 - 设置</title>
+
+  <style>
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+
+      font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+
+      background: #f8f9fa;
+
+      color: #333;
+
+      padding: 20px;
+
+      max-width: 800px;
+
+      margin: 0 auto;
+
+    }
+
+    h1 {
+
+      font-size: 22px;
+
+      margin-bottom: 24px;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 10px;
+
+    }
+
+    .section {
+
+      background: white;
+
+      border-radius: 12px;
+
+      padding: 20px;
+
+      margin-bottom: 16px;
+
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+    }
+
+    .section h2 {
+
+      font-size: 16px;
+
+      margin-bottom: 16px;
+
+      color: #444;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+    }
+
+    .section-badge {
+
+      display: inline-block;
+
+      font-size: 10px;
+
+      padding: 2px 8px;
+
+      border-radius: 10px;
+
+      margin-left: 8px;
+
+      font-weight: normal;
+
+    }
+
+    .badge-new { background: #E3F2FD; color: #1565C0; }
+
+    .badge-ai { background: #F3E5F5; color: #7B1FA2; }
+
+    .badge-api { background: #FFF3E0; color: #E65100; }
+
+    .toggle-item {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      padding: 10px 0;
+
+      border-bottom: 1px solid #f0f0f0;
+
+    }
+
+    .toggle-item:last-child { border-bottom: none; }
+
+    .toggle-item .info { flex: 1; }
+
+    .toggle-item .info .title { font-size: 14px; font-weight: 500; }
+
+    .toggle-item .info .desc { font-size: 12px; color: #999; margin-top: 2px; }
+
+    /* Toggle Switch */
+
+    .switch {
+
+      position: relative;
+
+      display: inline-block;
+
+      width: 44px;
+
+      height: 24px;
+
+      flex-shrink: 0;
+
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+
+      position: absolute;
+
+      cursor: pointer;
+
+      top: 0; left: 0; right: 0; bottom: 0;
+
+      background: #ccc;
+
+      transition: 0.3s;
+
+      border-radius: 24px;
+
+    }
+
+    .slider:before {
+
+      content: "";
+
+      position: absolute;
+
+      height: 18px; width: 18px;
+
+      left: 3px; bottom: 3px;
+
+      background: white;
+
+      transition: 0.3s;
+
+      border-radius: 50%;
+
+    }
+
+    input:checked + .slider { background: #667eea; }
+
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* API Key Input */
+
+    .api-input-group {
+
+      display: flex;
+
+      gap: 8px;
+
+      margin-top: 8px;
+
+      margin-bottom: 4px;
+
+    }
+
+    .api-input-group input {
+
+      flex: 1;
+
+      padding: 8px 12px;
+
+      border: 1px solid #ddd;
+
+      border-radius: 6px;
+
+      font-size: 13px;
+
+      font-family: monospace;
+
+      outline: none;
+
+    }
+
+    .api-input-group input:focus { border-color: #667eea; }
+
+    .api-input-group input::placeholder { color: #bbb; }
+
+    .api-status {
+
+      font-size: 11px;
+
+      margin-top: 4px;
+
+    }
+
+    .api-status.ok { color: #4CAF50; }
+
+    .api-status.err { color: #F44336; }
+
+    .api-status.info { color: #999; }
+
+    select {
+
+      padding: 8px 12px;
+
+      border: 1px solid #ddd;
+
+      border-radius: 6px;
+
+      font-size: 13px;
+
+      background: white;
+
+      cursor: pointer;
+
+    }
+
+    .list-section {
+
+      margin-top: 8px;
+
+    }
+
+    .list-input {
+
+      display: flex;
+
+      gap: 8px;
+
+      margin-bottom: 12px;
+
+    }
+
+    .list-input input {
+
+      flex: 1;
+
+      padding: 8px 12px;
+
+      border: 1px solid #ddd;
+
+      border-radius: 6px;
+
+      font-size: 13px;
+
+      outline: none;
+
+    }
+
+    .list-input input:focus { border-color: #667eea; }
+
+    .list-input button {
+
+      padding: 8px 16px;
+
+      background: #667eea;
+
+      color: white;
+
+      border: none;
+
+      border-radius: 6px;
+
+      cursor: pointer;
+
+      font-size: 13px;
+
+    }
+
+    .list-input button:hover { background: #5a6fd6; }
+
+    .list-item {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      padding: 8px 12px;
+
+      background: #f8f9fa;
+
+      border-radius: 6px;
+
+      margin-bottom: 4px;
+
+      font-size: 13px;
+
+    }
+
+    .list-item .domain { font-family: monospace; }
+
+    .list-item .remove {
+
+      background: #FFEBEE;
+
+      color: #C62828;
+
+      border: none;
+
+      padding: 4px 10px;
+
+      border-radius: 4px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+
+    }
+
+    .list-item .remove:hover { background: #FFCDD2; }
+
+    .empty-list {
+
+      text-align: center;
+
+      padding: 20px;
+
+      color: #999;
+
+      font-size: 13px;
+
+    }
+
+    .tabs {
+
+      display: flex;
+
+      gap: 4px;
+
+      margin-bottom: 16px;
+
+    }
+
+    .tab {
+
+      padding: 8px 18px;
+
+      border: none;
+
+      background: #f0f0f0;
+
+      cursor: pointer;
+
+      border-radius: 6px;
+
+      font-size: 13px;
+
+      transition: 0.2s;
+
+    }
+
+    .tab.active { background: #667eea; color: white; }
+
+    .tab:hover:not(.active) { background: #e0e0e0; }
+
+    .hidden { display: none; }
+
+    .btn-import {
+
+      padding: 6px 14px;
+
+      background: #f0f0f0;
+
+      border: 1px solid #ddd;
+
+      border-radius: 6px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+
+      margin-left: 8px;
+
+    }
+
+    .btn-import:hover { background: #e0e0e0; }
+
+    .toast {
+
+      position: fixed;
+
+      bottom: 20px;
+
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      background: #333;
+
+      color: white;
+
+      padding: 10px 20px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+
+      opacity: 0;
+
+      transition: 0.3s;
+
+      pointer-events: none;
+
+    }
+
+    .toast.show { opacity: 1; }
+
+    textarea {
+
+      width: 100%;
+
+      min-height: 100px;
+
+      padding: 10px;
+
+      border: 1px solid #ddd;
+
+      border-radius: 6px;
+
+      font-family: monospace;
+
+      font-size: 12px;
+
+      margin-top: 8px;
+
+      resize: vertical;
+
+    }
+
+    .import-actions {
+
+      display: flex;
+
+      gap: 8px;
+
+      margin-top: 8px;
+
+    }
+
+    .import-actions button {
+
+      padding: 6px 14px;
+
+      border: none;
+
+      border-radius: 6px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+
+    }
+
+    .import-actions .btn-ok { background: #667eea; color: white; }
+
+    .import-actions .btn-cancel { background: #f0f0f0; color: #333; }
+
+    .info-box {
+
+      background: #F3E5F5;
+
+      border-radius: 8px;
+
+      padding: 12px;
+
+      margin-top: 8px;
+
+      font-size: 12px;
+
+      color: #7B1FA2;
+
+      line-height: 1.6;
+
+    }
+
+    .info-box a { color: #7B1FA2; font-weight: bold; }
+
+    .info-box.blue { background: #E3F2FD; color: #1565C0; }
+
+    .info-box.blue a { color: #1565C0; }
+
+    .info-box.green { background: #E8F5E9; color: #2E7D32; }
+
+    .info-box.orange { background: #FFF3E0; color: #E65100; }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>⚙️ 钓鱼检测器设置</h1>
+
+  <!-- 检测设置 -->
+
+  <div class="section">
+
+    <h2>&#x1F50D; 基础检测设置</h2>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">URL 特征检测</div>
+
+        <div class="desc">检测URL中的钓鱼特征，如IP直连、特殊符号、可疑域名等</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableUrlDetection" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">页面内容检测</div>
+
+        <div class="desc">分析页面HTML内容，检测钓鱼表单、品牌模仿等</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enablePageDetection" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">行为特征检测</div>
+
+        <div class="desc">检测页面重定向行为是否符合钓鱼特征</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableBehaviorDetection" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">DOM 动态监控 <span class="section-badge badge-new">NEW</span></div>
+
+        <div class="desc">实时监控页面DOM变化，捕获动态注入的表单/iframe/脚本</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableDomMonitoring" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">SSL 证书检查 <span class="section-badge badge-new">NEW</span></div>
+
+        <div class="desc">检测HTTP页面（非HTTPS），尤其是登录页面</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableSslCheck" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">显示通知</div>
+
+        <div class="desc">检测到风险时显示系统通知</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="showNotifications" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">自动拦截高风险页面</div>
+
+        <div class="desc">自动将高风险页面重定向到拦截页面</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="autoBlock">
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">警告阈值</div>
+
+        <div class="desc">达到什么风险等级时显示警告</div>
+
+      </div>
+
+      <select id="warnThreshold">
+
+        <option value="low">低风险</option>
+
+        <option value="medium" selected>中风险</option>
+
+        <option value="high">高风险</option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+  <!-- AI / ML 检测 -->
+
+  <div class="section">
+
+    <h2>&#x1F9E0; AI/ML 智能检测 <span class="section-badge badge-ai">NEW</span></h2>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">ML 神经网络检测 <span class="section-badge badge-ai">AI</span></div>
+
+        <div class="desc">轻量级神经网络（38→16→1），纯JS运行，无外部依赖。基于样本数据训练，自动学习钓鱼权重</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableMLDetection" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div class="info-box">
+
+      <strong>🧠 ML 模型信息：</strong> 38维特征输入 → 16神经元隐藏层 → 1维输出（Sigmoid）。<br>
+
+      使用真实钓鱼样本 + 合法域名生成训练集，自动学习最优权重组合。<br>
+
+      模型在本地加载运行，不会发送任何数据到外部。
+    </div>
+
+  </div>
+
+  <!-- Google Safe Browsing API -->
+
+  <div class="section">
+
+    <h2>&#x1F6E1; Google Safe Browsing API <span class="section-badge badge-api">NEW</span></h2>
+
+    <div class="toggle-item">
+
+      <div class="info">
+
+        <div class="title">启用 Safe Browsing 检测 <span class="section-badge badge-api">P0</span></div>
+
+        <div class="desc">查询 Google Safe Browsing 数据库，匹配已知钓鱼/恶意网站</div>
+
+      </div>
+
+      <label class="switch">
+
+        <input type="checkbox" id="enableSafeBrowsing">
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <div id="safeBrowsingApiSection">
+
+      <div class="api-input-group">
+
+        <input type="password" id="safeBrowsingApiKey" placeholder="输入你的 Google Safe Browsing API Key">
+
+        <button id="toggleSbKey" style="padding:8px 12px;background:#f0f0f0;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:12px;">&#x1F441;</button>
+
+      </div>
+
+      <div id="sbApiStatus" class="api-status info">⏸ 需要 API Key 才能启用</div>
+
+      <div class="info-box blue">
+
+        <strong>🔑 如何获取 API Key：</strong><br>
+
+        1. 访问 <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
+
+        2. 创建或选择项目 → 启用 "Safe Browsing API"<br>
+
+        3. 创建 API Key → 限制只用于 Safe Browsing API<br>
+
+        4. 免费版每天 10,000 次查询，完全够用
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 白名单 & 黑名单 -->
+
+  <div class="section">
+
+    <h2>&#x1F4CB; 名单管理</h2>
+
+    <div class="tabs">
+
+      <button class="tab active" data-tab="whitelist">✅ 白名单</button>
+
+      <button class="tab" data-tab="blacklist">⛔ 黑名单</button>
+
+    </div>
+
+    <!-- 白名单 -->
+
+    <div id="whitelistTab" class="list-section">
+
+      <div class="list-input">
+
+        <input type="text" id="whitelistInput" placeholder="输入域名，如 example.com">
+
+        <button id="addWhitelist">添加</button>
+
+      </div>
+
+      <div style="margin-bottom:8px;">
+
+        <button class="btn-import" id="importWhitelist">&#x1F4E5; 批量导入</button>
+
+        <button class="btn-import" id="exportWhitelist">&#x1F4E4; 导出</button>
+
+        <div id="importWhitelistArea" class="hidden">
+
+          <textarea id="whitelistBulkInput" placeholder="每行一个域名"></textarea>
+
+          <div class="import-actions">
+
+            <button class="btn-ok" id="confirmWhitelistImport">确认导入</button>
+
+            <button class="btn-cancel" id="cancelWhitelistImport">取消</button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="whitelistContainer"></div>
+
+    </div>
+
+    <!-- 黑名单 -->
+
+    <div id="blacklistTab" class="list-section hidden">
+
+      <div class="list-input">
+
+        <input type="text" id="blacklistInput" placeholder="输入域名，如 phishing.com">
+
+        <button id="addBlacklist">添加</button>
+
+      </div>
+
+      <div style="margin-bottom:8px;">
+
+        <button class="btn-import" id="importBlacklist">&#x1F4E5; 批量导入</button>
+
+        <button class="btn-import" id="exportBlacklist">&#x1F4E4; 导出</button>
+
+        <div id="importBlacklistArea" class="hidden">
+
+          <textarea id="blacklistBulkInput" placeholder="每行一个域名"></textarea>
+
+          <div class="import-actions">
+
+            <button class="btn-ok" id="confirmBlacklistImport">确认导入</button>
+
+            <button class="btn-cancel" id="cancelBlacklistImport">取消</button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="blacklistContainer"></div>
+
+    </div>
+
+  </div>
+
+  <!-- 检测规则说明 -->
+
+  <div class="section">
+
+    <h2>&#x1F4D6; 检测层级说明</h2>
+
+    <div style="font-size:13px;line-height:1.8;color:#555;">
+
+      <p><strong>5 层检测架构：</strong></p>
+
+      <p><strong>第1层 - URL特征规则</strong> (24条, 评分6-35/条)</p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>IP地址直连、@符号、多重协议、短链接、可疑TLD、品牌相似度、变体域名、IDN同形字 等</li>
+
+      </ul>
+
+      <p><strong>第2层 - 页面内容规则</strong> (12条, 评分5-20/条)</p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>密码表单、外部表单提交、隐藏iframe、外部脚本、HTTPS检查 等</li>
+
+      </ul>
+
+      <p><strong>第3层 - 行为规则</strong> (2条, 评分10-15/条)</p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>快速导航、跨域表单</li>
+
+      </ul>
+
+      <p><strong>第4层 - ML神经网络</strong> <span class="section-badge badge-ai" style="font-size:10px;padding:1px 6px;">NEW</span></p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>38维特征 → 16隐藏层 → 输出概率（最高贡献60分）</li>
+
+      </ul>
+
+      <p><strong>第5层 - 外部API</strong> <span class="section-badge badge-api" style="font-size:10px;padding:1px 6px;">NEW</span></p>
+
+      <ul style="padding-left:20px;margin-bottom:8px;">
+
+        <li>Google Safe Browsing（最高60分）、SSL证书检查（最高20分）</li>
+
+      </ul>
+
+      <p style="margin-top:12px;"><strong>最终评级:</strong> ≥55分=高风险 | 28-54分=中风险 | 10-27分=低风险 | &lt;10分=安全</p>
+
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="options.js"></script>
+
+</body>
+
+</html>

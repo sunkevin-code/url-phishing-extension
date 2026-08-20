@@ -1,0 +1,4 @@
+{
+  "extName": { "message": "钓鱼链接检测器" },
+  "extDesc": { "message": "通过分析URL、页面内容和行为模式检测钓鱼网站" }
+}

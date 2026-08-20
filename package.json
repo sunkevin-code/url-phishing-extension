@@ -1,0 +1,19 @@
+{
+  "name": "url-phishing-extension",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate_icons.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

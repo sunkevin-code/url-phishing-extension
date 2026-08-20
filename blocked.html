@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deceptive site ahead - Phishing Detector</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #d32f2f;
+      min-height: 100vh;
+      color: #333;
+    }
+    .top-bar { background: #b71c1c; padding: 8px 0; }
+    .warning-header {
+      background: #fff;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .warning-icon {
+      width: 72px; height: 72px;
+      background: #d32f2f;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .warning-icon svg { width: 36px; height: 36px; fill: #fff; }
+    .warning-header h1 {
+      font-size: 24px;
+      color: #d32f2f;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .warning-header p {
+      font-size: 14px;
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .content {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+    .info-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #555;
+    }
+    .info-box strong { color: #333; }
+    .url-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      word-break: break-all;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 13px;
+      color: #999;
+    }
+    .risk-details {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .risk-details h3 {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 12px;
+    }
+    .risk-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .risk-row:last-child { border-bottom: none; }
+    .risk-row .label { color: #888; }
+    .risk-row .value { font-weight: 500; }
+    .risk-row .value.danger { color: #d32f2f; }
+    .triggered-rules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .rule-chip {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .rule-chip.url { background: #E3F2FD; color: #1565C0; }
+    .rule-chip.page { background: #FCE4EC; color: #C62828; }
+    .rule-chip.behavior { background: #FFF3E0; color: #E65100; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: center;
+    }
+    .btn {
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-back {
+      background: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .btn-back:hover { background: #f5f5f5; }
+    .btn-proceed {
+      background: #d32f2f;
+      color: #fff;
+    }
+    .btn-proceed:hover { background: #b71c1c; }
+    .footer-links {
+      text-align: center;
+      margin-top: 16px;
+    }
+    .footer-links a {
+      color: #999;
+      font-size: 12px;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+    .footer-links a:hover { color: #666; text-decoration: underline; }
+    .details-panel { display: none; margin-top:16px;background:#fff;border-radius:8px;padding:16px 20px;font-size:12px;color:#888;line-height:1.6; }
+    .details-panel.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="top-bar"></div>
+  <div class="warning-header">
+    <div class="warning-icon">
+      <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+    </div>
+    <h1>Deceptive site ahead</h1>
+    <p>Attackers on <strong id="blockedDomain" style="color:#d32f2f;">this site</strong> may trick you into doing something dangerous like revealing your personal information (passwords, credit cards, or login credentials).</p>
+  </div>
+
+  <div class="content">
+    <div class="info-box">
+      <strong>Phishing Detector</strong> blocked this page because it was identified as a
+      <strong style="color:#d32f2f;" id="levelLabel">high-risk</strong> phishing site.
+      This page may try to steal your credentials or personal data.
+    </div>
+
+    <div class="url-box" id="urlDisplay">-</div>
+
+    <div class="risk-details">
+      <h3>Detection Details</h3>
+      <div class="risk-row">
+        <span class="label">Risk Score</span>
+        <span class="value danger" id="scoreDisplay">0 / 100</span>
+      </div>
+      <div class="risk-row">
+        <span class="label">Rules Triggered</span>
+        <span class="value" id="ruleCount">0</span>
+      </div>
+      <div class="risk-row">
+        <span class="label">Blocked At</span>
+        <span class="value" id="blockTime">-</span>
+      </div>
+      <div class="risk-row">
+        <span class="label">Detection Method</span>
+        <span class="value" id="detectionMethod">-</span>
+      </div>
+      <div id="triggeredRules" class="triggered-rules"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-back" onclick="window.history.back()">Back to safety</button>
+      <button class="btn btn-proceed" id="proceedBtn">Proceed to site (unsafe)</button>
+    </div>
+    <div class="footer-links">
+      <a href="#" id="btnWhitelistAction">Add to whitelist</a>
+      <span style="color:#ddd;">|</span>
+      <a href="#" id="btnOpenOptions">Settings</a>
+      <span style="color:#ddd;">|</span>
+      <a href="#" id="btnToggleDetails">Show technical details</a>
+    </div>
+    <div id="detailsPanel" class="details-panel"></div>
+  </div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var url = params.get("url") || "unknown";
+    var score = params.get("score") || "0";
+    var rulesRaw = params.get("rules") || "[]";
+    var rules = [];
+    try { rules = JSON.parse(decodeURIComponent(rulesRaw)); } catch(e) {}
+
+    var ruleNames = {
+      url_ip_host: "IP Address Connection",
+      url_suspicious_port: "Suspicious Port",
+      url_long_domain: "Long Domain Name",
+      url_at_symbol: "@ Symbol in URL",
+      url_double_protocol: "Double Protocol Prefix",
+      url_shortened: "Shortened URL Service",
+      url_multiple_hyphens: "Multiple Hyphens",
+      url_security_keywords: "Security Keywords in URL",
+      url_suspicious_tld: "Suspicious Top-level Domain",
+      url_many_subdomains: "Too Many Subdomains",
+      url_hex_encoding: "Hex Encoding in URL",
+      url_third_party_subdomain: "Third-party Platform Subdomain",
+      url_brand_similarity: "Brand Name Similarity",
+      url_typosquatting: "Typosquatting Detected",
+      url_homograph: "Homograph Attack",
+      url_data_uri: "Data URI Scheme",
+      url_b64_path: "Base64 Encoded Path",
+      url_random_domain: "Random Domain Pattern",
+      url_service_spoof: "Service Name Spoofing",
+      page_password_field: "Password Input Field",
+      page_login_form: "Login Form Detected",
+      page_external_form: "External Form Submission",
+      page_excessive_iframes: "Excessive iframes",
+      page_in_iframe: "Page in iframe",
+      page_brand_imitation: "Brand Imitation Content",
+      page_hidden_elements: "Hidden Elements",
+      page_few_links: "Few External Links",
+      page_external_scripts: "External Script Sources",
+      page_meta_redirect: "Meta Refresh Redirect",
+      page_cloaking: "Page Cloaking Detected",
+      page_popup_redirect: "Popup Hijack Attempt",
+      page_fake_favicon: "Fake Favicon",
+      behavior_fast_redirect: "Fast Redirect Chain",
+      behavior_many_redirects: "Multiple Redirects"
+    };
+
+    var ruleCategories = {
+      url_ip_host: "url", url_suspicious_port: "url", url_long_domain: "url",
+      url_at_symbol: "url", url_double_protocol: "url", url_shortened: "url",
+      url_multiple_hyphens: "url", url_security_keywords: "url", url_suspicious_tld: "url",
+      url_many_subdomains: "url", url_hex_encoding: "url", url_third_party_subdomain: "url",
+      url_brand_similarity: "url", url_typosquatting: "url", url_homograph: "url",
+      url_data_uri: "url", url_b64_path: "url", url_random_domain: "url", url_service_spoof: "url",
+      page_password_field: "page", page_login_form: "page", page_external_form: "page",
+      page_excessive_iframes: "page", page_in_iframe: "page", page_brand_imitation: "page",
+      page_hidden_elements: "page", page_few_links: "page", page_external_scripts: "page",
+      page_meta_redirect: "page", page_cloaking: "page", page_popup_redirect: "page",
+      page_fake_favicon: "page",
+      behavior_fast_redirect: "behavior", behavior_many_redirects: "behavior"
+    };
+
+    var scoreNum = parseInt(score) || 0;
+    var level = scoreNum >= 50 ? "high-risk" : scoreNum >= 25 ? "medium-risk" : "low-risk";
+
+    try {
+      var hostname = new URL(url).hostname;
+      document.getElementById("blockedDomain").textContent = hostname;
+    } catch(e) {}
+
+    document.getElementById("levelLabel").textContent = level;
+    document.getElementById("scoreDisplay").textContent = score + " / 100";
+    document.getElementById("ruleCount").textContent = rules.length;
+    document.getElementById("urlDisplay").textContent = url;
+    document.getElementById("blockTime").textContent = new Date().toLocaleString();
+
+    var catCounts = { url: 0, page: 0, behavior: 0 };
+    var rulesContainer = document.getElementById("triggeredRules");
+    var html = "";
+    for (var i = 0; i < rules.length; i++) {
+      var rule = rules[i];
+      var cat = ruleCategories[rule.id] || "url";
+      catCounts[cat]++;
+      var name = ruleNames[rule.id] || rule.id;
+      html += '<span class="rule-chip ' + cat + '">' + name + '</span>';
+    }
+    rulesContainer.innerHTML = html || '<span style="font-size:12px;color:#bbb;">Blacklist match</span>';
+
+    var methodText = [];
+    if (catCounts.url > 0) methodText.push("URL Analysis (" + catCounts.url + ")");
+    if (catCounts.page > 0) methodText.push("Page Analysis (" + catCounts.page + ")");
+    if (catCounts.behavior > 0) methodText.push("Behavior Analysis (" + catCounts.behavior + ")");
+    document.getElementById("detectionMethod").textContent = methodText.join(", ") || "Blacklist";
+
+    document.getElementById("proceedBtn").addEventListener("click", function() {
+      if (url && url !== "unknown") {
+        try {
+          var domain = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+          chrome.runtime.sendMessage({ type: "ADD_WHITELIST", domain: domain });
+          window.location.href = url;
+        } catch(e) {}
+      }
+    });
+
+    document.getElementById("btnWhitelistAction").addEventListener("click", function(e) {
+      e.preventDefault();
+      try {
+        var domain = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+        chrome.runtime.sendMessage({ type: "ADD_WHITELIST", domain: domain });
+        alert("Domain added to whitelist. It will no longer be blocked.");
+      } catch(e) {}
+    });
+
+    document.getElementById("btnOpenOptions").addEventListener("click", function(e) {
+      e.preventDefault();
+      chrome.runtime.openOptionsPage();
+    });
+
+    document.getElementById("btnToggleDetails").addEventListener("click", function(e) {
+      e.preventDefault();
+      var panel = document.getElementById("detailsPanel");
+      var showing = panel.classList.toggle("show");
+      if (showing) {
+        var detailHtml = "<strong>Full URL:</strong><br>" + (url || "N/A") + "<br><br>";
+        detailHtml += "<strong>Score Breakdown:</strong><br>";
+        detailHtml += "URL Analysis: " + catCounts.url + " rules triggered<br>";
+        detailHtml += "Page Analysis: " + catCounts.page + " rules triggered<br>";
+        detailHtml += "Behavior Analysis: " + catCounts.behavior + " rules triggered<br><br>";
+        detailHtml += "<strong>Triggered Rules:</strong><br>";
+        for (var i = 0; i < rules.length; i++) {
+          var r = rules[i];
+          detailHtml += "- " + (ruleNames[r.id] || r.id) + " [" + (ruleCategories[r.id] || "url") + "]<br>";
+        }
+        if (rules.length === 0) detailHtml += "- Blacklist match<br>";
+        detailHtml += "<br><em>For security researchers only.</em>";
+        panel.innerHTML = detailHtml;
+      }
+      this.textContent = showing ? "Hide technical details" : "Show technical details";
+    });
+  </script>
+</body>
+</html>

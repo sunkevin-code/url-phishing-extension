@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Link Detector</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 380px;
+      font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .header h1 { font-size: 18px; margin-bottom: 4px; }
+    .header p { font-size: 12px; opacity: 0.85; }
+    .score-section {
+      padding: 16px 20px;
+      background: white;
+      margin: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .score-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 24px; font-weight: bold;
+      border: 4px solid;
+      transition: all 0.3s;
+    }
+    .score-circle.safe { border-color: #4CAF50; color: #4CAF50; }
+    .score-circle.low { border-color: #FF9800; color: #FF9800; }
+    .score-circle.medium { border-color: #FF5722; color: #FF5722; }
+    .score-circle.high { border-color: #F44336; color: #F44336; animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244,67,54,0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(244,67,54,0); }
+    }
+    .status-text { text-align: center; font-size: 14px; margin-bottom: 8px; }
+    .status-text .domain { font-size: 12px; color: #999; word-break: break-all; }
+    .details-section {
+      padding: 0 12px 12px;
+    }
+    .detail-card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .detail-card h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 12px;
+      color: #555;
+    }
+    .detail-item .label { color: #888; }
+    .detail-item .value { font-weight: 500; }
+    .detail-item .value.risk { color: #F44336; }
+    .detail-item .value.safe { color: #4CAF50; }
+    .detail-item .value.warn { color: #FF9800; }
+    .triggered-rules {
+      margin-top: 8px;
+    }
+    .rule-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin: 2px;
+    }
+    .rule-tag.url { background: #E3F2FD; color: #1565C0; }
+    .rule-tag.page { background: #FCE4EC; color: #C62828; }
+    .rule-tag.behavior { background: #FFF3E0; color: #E65100; }
+    .actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+    }
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .actions button:active { transform: scale(0.96); }
+    .btn-whitelist { background: #E8F5E9; color: #2E7D32; }
+    .btn-whitelist:hover { background: #C8E6C9; }
+    .btn-blacklist { background: #FFEBEE; color: #C62828; }
+    .btn-blacklist:hover { background: #FFCDD2; }
+    .btn-settings { background: #E3F2FD; color: #1565C0; }
+    .btn-settings:hover { background: #BBDEFB; }
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 16px;
+      background: white;
+      margin: 0 12px 12px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .stat-item { text-align: center; }
+    .stat-item .num { font-size: 18px; font-weight: bold; }
+    .stat-item .label { font-size: 11px; color: #999; }
+    .stat-item .num.safe { color: #4CAF50; }
+    .stat-item .num.warn { color: #FF9800; }
+    .stat-item .num.blocked { color: #F44336; }
+    .loading { text-align: center; padding: 30px; color: #999; font-size: 13px; }
+    .no-risk { text-align: center; padding: 12px; color: #4CAF50; font-size: 18px; }
+    .footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 11px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>&#x1F6E1; Phishing Link Detector</h1>
+    <p>Real-time URL phishing detection</p>
+  </div>
+
+  <div id="loading" class="loading"><span id="loadingText">正在初始化...</span></div>
+
+  <div id="result" style="display:none;">
+    <div class="score-section">
+      <div id="scoreCircle" class="score-circle safe">0</div>
+      <div class="status-text">
+        <div id="statusLabel">Safe</div>
+        <div id="domainDisplay" class="domain">-</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div id="statSafe" class="num safe">0</div>
+        <div class="label">Total</div>
+      </div>
+      <div class="stat-item">
+        <div id="statWarn" class="num warn">0</div>
+        <div class="label">Warned</div>
+      </div>
+      <div class="stat-item">
+        <div id="statBlocked" class="num blocked">0</div>
+        <div class="label">Blocked</div>
+      </div>
+      <div class="stat-item">
+        <div id="statTotal" class="num">0</div>
+        <div class="label">Total</div>
+      </div>
+    </div>
+
+    <div id="details" class="details-section"></div>
+
+    <div class="actions">
+      <button id="btnWhitelist" class="btn-whitelist">Add to Whitelist</button>
+      <button id="btnBlacklist" class="btn-blacklist">Add to Blacklist</button>
+      <button id="btnTestRunner" class="btn-settings" style="background:#FFF3E0;color:#E65100;">Test Runner</button>
+      <button id="btnDashboard" class="btn-settings" onclick="window.open(chrome.runtime.getURL('dashboard.html'))" style="background:#E8F5E9;color:#2E7D32;">Dashboard</button>
+      <button id="btnSettings" class="btn-settings">Settings</button>
+    </div>
+  </div>
+
+  <div class="footer">URL Phishing Detector v1.0</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

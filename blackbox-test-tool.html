@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Phishing URL Black-Box Test Tool</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333}
+.top-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.top-bar h1{font-size:20px}
+.mode-badge{font-size:11px;padding:4px 10px;border-radius:12px;font-weight:600;background:rgba(255,255,255,.15)}
+.main{max-width:1400px;margin:0 auto;padding:20px}
+.panel{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;margin:3px}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#667eea;color:#fff}.btn-primary:hover:not(:disabled){background:#5a6fd6}
+.btn-danger{background:#f44336;color:#fff}.btn-danger:hover:not(:disabled){background:#d32f2f}
+.btn-warn{background:#FF9800;color:#fff}.btn-warn:hover:not(:disabled){background:#F57C00}
+.btn-outline{background:#fff;color:#667eea;border:1px solid #667eea}.btn-outline:hover{background:#f0f2ff}
+.btn-sm{padding:6px 14px;font-size:12px}
+select,input[type=number]{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
+select:focus,input:focus{border-color:#667eea}
+label{font-size:12px;color:#666;margin-right:4px}
+#status{padding:8px 16px;background:#f5f5f5;border-radius:8px;font-size:13px;color:#666;min-height:40px;display:flex;align-items:center;flex:1}
+.how-it-works{background:#E3F2FD;border-left:4px solid #1565C0;padding:14px 18px;border-radius:0 8px 8px 0;font-size:12px;color:#0D47A1;line-height:1.7;margin-bottom:16px}
+.how-it-works strong{color:#0D47A1}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.card{background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card .val{font-size:26px;font-weight:700}.card .lbl{font-size:10px;color:#888;text-transform:uppercase;margin-top:4px}
+.c-dr .val{color:#4CAF50}.c-fpr .val{color:#FF9800}.c-tot .val{color:#667eea}.c-f1 .val{color:#e91e63}.c-acc .val{color:#3f51b5}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f5f5f5;padding:10px 8px;text-align:left;font-weight:600;border-bottom:2px solid #ddd;position:sticky;top:0}
+td{padding:8px;border-bottom:1px solid #eee;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:hover{background:#f8f9ff}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.bg-tp{background:#E8F5E9;color:#2E7D32}.bg-tn{background:#E3F2FD;color:#1565C0}
+.bg-fp{background:#FFF3E0;color:#E65100}.bg-fn{background:#FFEBEE;color:#C62828}
+.bg-bl{background:#FFCDD2;color:#B71C1C}.bg-ps{background:#C8E6C9;color:#1B5E20}
+.bg-uk{background:#F5F5F5;color:#616161}
+#scroll{max-height:500px;overflow-y:auto}
+.textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:monospace;min-height:60px;resize:vertical}
+#manualSection{display:none;margin-top:12px}
+.pulse{animation:pulse 1.5s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.stop-btn{background:#f44336!important;color:#fff!important}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <h1>&#x1F6E1; Phishing URL Black-Box Test Tool</h1>
+  <span class="mode-badge">&#x1F513; Black-Box | No Rule Knowledge Needed</span>
+</div>
+
+<div class="main">
+  <div class="how-it-works">
+    <strong>&#x1F4A1; How it works:</strong> This tool <strong>does NOT analyze URL content</strong>. It opens each URL in a popup window / iframe and observes whether your browser or extension <strong>blocks, closes, or redirects</strong> it. Works with ANY anti-phishing extension (Chrome Safe Browsing, your own extension, or third-party extensions).
+    <br><strong>Popup method:</strong> Opens a real browser window for each URL. If the window gets closed by an extension &#x2192; BLOCKED.
+    <br><strong>Iframe method:</strong> Loads URLs in hidden sandboxed iframes. If loading fails or times out &#x2192; BLOCKED.
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <button class="btn btn-primary" id="btnPopup">&#x1F4CB; Popup Probe Test (600 URLs)</button>
+      <button class="btn btn-warn" id="btnIframe">&#x1F5BC; Iframe Probe Test (600 URLs)</button>
+      <button class="btn btn-outline" id="btnManual">&#x25B6; Test Pasted URLs</button>
+      <button class="btn btn-danger" id="btnFetch">&#x1F310; Fetch OpenPhish + Test</button>
+      <button class="btn btn-danger" id="btnPT">&#x1F4E6; Fetch PhishTank + Test</button>
+      <button class="btn btn-outline btn-sm" id="btnExport" disabled>&#x1F4E5; Export CSV</button>
+      <button class="btn btn-outline btn-sm" id="btnClear">&#x1F5D1; Clear</button>
+      <button class="btn btn-outline btn-sm" id="btnStop" style="display:none;background:#f44336;color:#fff;border-color:#f44336">&#x23F9; STOP</button>
+    </div>
+    <div class="row">
+      <label>Probe Method:</label>
+      <select id="method">
+        <option value="popup" selected>Popup Window (accurate)</option>
+        <option value="iframe">Iframe Sandbox (fast)</option>
+      </select>
+      <label>Timeout:</label>
+      <select id="timeout">
+        <option value="1500">1.5s (fast)</option>
+        <option value="3000" selected>3s (balanced)</option>
+        <option value="5000">5s (thorough)</option>
+        <option value="8000">8s (slow but sure)</option>
+      </select>
+      <span id="status">Ready. Open this file in any browser. No extension knowledge needed.</span>
+    </div>
+    <div id="manualSection">
+      <textarea class="textarea" id="manualUrls" placeholder="Paste URLs (one per line). Use #phishing and #benign headers to label sections."></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-primary btn-sm" id="btnRunManual">&#x25B6; Run Test on Pasted URLs</button>
+        <input type="file" id="fileInput" accept=".txt,.csv" style="display:none">
+        <button class="btn btn-outline btn-sm" id="btnLoadFile">&#x1F4C2; Load File</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics" id="metrics" style="display:none">
+    <div class="card c-tot"><div class="val" id="mTotal">0</div><div class="lbl">Total Tested</div></div>
+    <div class="card c-dr"><div class="val" id="mDR">0%</div><div class="lbl">Detection Rate</div></div>
+    <div class="card c-fpr"><div class="val" id="mFPR">0%</div><div class="lbl">False Positive</div></div>
+    <div class="card c-f1"><div class="val" id="mF1">0%</div><div class="lbl">F1 Score</div></div>
+    <div class="card c-acc"><div class="val" id="mAcc">0%</div><div class="lbl">Accuracy</div></div>
+  </div>
+
+  <div class="panel" id="resultsPanel" style="display:none">
+    <div id="scroll"><table><thead><tr><th>#</th><th>URL</th><th>Label</th><th>Method</th><th>Result</th><th>Verdict</th><th>Time</th></tr></thead>
+    <tbody id="resultsBody"></tbody></table></div>
+  </div>
+</div>
+
+<script>
+var PH=["https://slack-verify.bid/signin","https://hellpdesk.at/?r=d614261b-37fd-45ba-aea9-b8c120f1bc86","https://bit.ly/w6b160","https://manyhotels.com.ng/mvcogjy/Veri.html","http://sp10ct6-frunov-biz-qarnex-platem.pages.dev/","https://cgr517ougiberl187myb8a6xr.review/login","https://www.y0u7u83.com/login","http://bnbhomes.in/Korea.html","https://m.js9851.com/","https://borderclick.com/BC/media/Borderclick/rttc.html","https://binance-1-2-11-uniswap.vercel.app/buy","https://alipay-safe.com/login?token=%11%55%57%99%9a%89%03%c2%ab%28","https://www.adobe-login.stream/login","https://instagram-access.trade/access","https://canva-secure.weebly.com/login","https://manualgcash.blogspot.com/","https://gemini.com.login.verify.webcam/","https://uber-secure.glitch.me/login","https://protonmail-verify.pages.dev/auth","https://microsoft.account.recover.ga/login","http://www.s29j.top/","https://metamask-verify.strikingly.com/auth","https://www.imtokevn.im/","https://17094.xyz/","https://phantomv.net/verify","https://popandc.be/wp-admin/js/cgi-ent/index--000....","https://rss3.readles.at/go/y264u244/y274x274","https://t.co/4uvm3n","https://gmail-verify.accountant/signin","http://fnclaim.pro/","https://twilightbrand.xyz/","https://prime-videosfrance.com/suivi","https://t.co/gyy8cz","https://www.roblox.com.bi/games/119987266683883/Survive-LAVA-for-Brainrots?privateServerLinkCode=29383763406896541593443970804931&game_id=119987266683883&game_name=Survive-LAVA-for-Brainrots","https://0un2pophjsa75le3w8de8.stream/login","https://www.meituan-login.review/login","http://sp0ct0-pralzo-biz-velnik-dorqu.pages.dev/","https://www.514ck.com/login","https://mytelshsryh.weebly.com/","https://rajsoull.github.io/Netflix-India/","https://rms6j2hnx2623o19p8olf2.date/login","https://alibaba-login-verify-secure.gq/account/auth/signin?redirect=login","https://4pp13-secure.com/account","https://gmail-confirm.cf/confirm","https://paypal.account.recover.faith/login","http://resarch.markusscholz.info/ga/click/2-9679085-10-8494-16604-9112-17afc9ad5f-27b11aed3c","https://admbyb.top/","https://workouts.mystagingwebsite.com/wp-content/plugins/vinvourist/public/index.php","https://instagrmm.vercel.app/","https://noxjahfsvqnlm25ywczrns.top/login","https://instagram-security.country/security","https://taobao-safe.com/login?token=%3f%2f%af%45%82%2a%94%53%e5%e0","http://sporting-apricot-xuiuvslnhr.edgeone.app/","https://sp10ct6-druntex-biz-glarnov-frutik.pages.dev/","http://sp10ct6-vrolor-biz-slatem-qurnax.pages.dev/","https://flow.templemail.info/ga/click/2-6748551-9-8695-16989-9317-403c2a6827-8e6391a3dc","https://sp10ct6-qravtem-biz-vrolnix-slarnor.pages.dev/","https://sso-security.com/E.MEKM8Ug8ovmfTg?/","http://googlebusiness.com-workspace.com/","https://zhihu-admin.cricket/admin","https://1217js.com/","https://uniswap-chi.vercel.app/","https://scotiawealthmanagement.com.cobblestonesw.com/","https://prime-videos2026.com/suivi","https://weibo-safe.com/login?token=%7f%ba%83%3e%5d%2b%f5%4e%1b%8c","https://l0glnn-m1croqx0qftcom-0utloolx1drvvefil3es.fwh.is/index.html?email=lorumlab@49a20767dfe6cd447667491d2770bdd532c5.org","https://generalhubservice.com/985205/","https://study.orsapaz.info/ga/click/2-6736491-9-8129-15917-8736-9d12ccec80-8e042984f4","https://binance-verify.azurewebsites.net/auth","https://discord-access.cf/access","https://www.metamask-login.click/login","https://account.spotify.secure.auth.trade/login","https://test-12-satr.github.io/test/","https://sundancecabinetdesign.com/wp/docusign/me/Windows/utility.php/download/download/index.php/","https://zoom-verify.date/signin","https://recusos-humanos.com/?r=ff86cd8e-80ce-41b3-8c7d-1cc06002a3d4","https://kuc01n-secure.com/account","https://yahoo-safe.com/login?token=%c0%bf%36%dd%e9%81%ab%bd%ec%22","https://sp5ct6-qoltor-biz-glarnor-vraltex.pages.dev/","https://www.exdsite.com/","https://www.netflix-login.science/login","https://kqinbasepro_iogin.godaddysites.com/","https://zp6kfeu1k9wijecheg2.tk/login","https://www.atlassian-login.ga/login","https://uber-verify.wordpress.com/auth","https://ra1csbt.pay-qoqa.cc/connect/session-eb879a0453a50ca82526b4699d4661a1cf/access/613d147ba96cff8304d0eeca897fd42c","https://www.robiox.com.py/users/167084827633/profile","https://tiny.cc/eu8bmx","https://bybit-verify.men/signin","https://account.snapchat.secure.auth.tk/login","https://netflix-clone-rust-ten.vercel.app/signup","https://www.roblox-login.bid/login","https://www.huobi-login.bid/login","https://zh1hu-secure.com/account","https://s3.eu-north-1.amazonaws.com/us-east-3.console.aws.amazon.com007/Dhll.html","https://www.instagram-clone-alpha-eight.vercel.app/","https://w31x1n-secure.com/account","https://amnaakhtar15.github.io/Amazon-clone/","https://spotify-login-verify-secure.work/account/auth/signin?redirect=login","http://demo.billmanthra.com/lawlibrary/secure_access-lawlibrary.html","https://u8ihfgbg6il7dgx8wf62jbftcrbn.date/login","https://shivaa.kiinoasnacks.info/ga/click/2-9843369-10-8685-16975-9310-1ae25ff4a6-d6714bdb7f","https://www.canva-login.party/login","https://cooltentregas.com.br/cumm/AMENCN-1/?email=galik2@ba305364ca4b31676ba03fa3849404cea7b8.com","http://sp10ct6-qornex-biz-vroltem-glurnik.pages.dev/","https://xiwwyydkfnxcqva.cr5prw2d0r.tk/verify","https://slack-security.cricket/security","http://roblox.et/communities/3190563751/FashionXModel","http://sp5ct6-frontek-biz-slavqor-dramnix.pages.dev/","https://kucoin-verify.firebaseapp.com/auth","https://meituan-verify.review/signin","https://douyin-safe.com/login?token=%ae%85%82%1f%02%9a%7f%71%46%52","https://weixin-verify.science/signin","http://top-top-rho.vercel.app/","https://coinbase-service.win/verify","https://inv2oav5nkinun3k7ot.men/login","http://mfacebook.com.vn/78eup3szuoi?a&l","http://regulatory-review.com/","https://metamask-verify.accountant/signin","https://twitch-secure.webflow.io/login","https://google-verify.bid/signin","https://linkedin-winner.webflow.io/airdrop","http://vsilex.com/docusign/Windows/utility.php/download/index.php","https://account.opensea.secure.auth.top/login","https://antttas.szm.sk/up/home.htm?vje9yijqula38x98zj81p2zdp5zw3levfatx6fsx39zajibsu6","https://paypal-service.faith/verify","https://canva-verify.xyz/signin","https://binance-verify.vercel.app/auth","http://web-git-erin-update-numericalinputs-uniswap.vercel.app/","https://atlassian-secure.weebly.com/login","https://kucoin.com.login.verify.men/","https://meituan-secure.onrender.com/login","http://yuzuapp.io/","https://roblox-safe.com/login?token=%f1%94%a1%8d%15%14%fb%6b%3a%41","https://www.okx-login.tk/login","https://atlassian-secure.wixsite.com/login","https://www.kucoin-login.accountant/login","https://vsilex.com/docusign/Windows/utility.php/download/index.php/download/index.php","https://cast-production-0209.up.railway.app/","https://zoom-verify.glitch.me/auth","https://17106.xyz/","https://www.d0uy1n.com/login","https://bfhuz9he47lsk1ng8v3opi5p4ekh9.xyz/login","https://wilsongroup.in/Docusign/Mac/utility.php/download/index.php/download/index.php","https://account.remote-otp.com/login?rid=cc4AdeZ","http://206.58.219.114:8443/login","https://365-notifcation.com/93132a08184/0e7994f46ef77d17999eceef/index.php?id=263bdbd4879cc1000096daec31a771e7","https://kucoin-verify.accountant/signin","https://paypal.account.recover.racing/login","http://147.87.27.200/canva/login","https://www.kraken-login.ga/login","http://127.78.195.36/taobao/login","https://whatsapp-connect.click/connect","https://m.yhcp668.com/","https://ow.ly/xktji2","https://notion-verify.surge.sh/auth","https://amazon-service.ml/verify","https://phantom-restore.cf/restore","https://account.taobao.secure.auth.top/login","https://shopify-admin.webcam/admin","https://cutt.ly/sr6j9","https://gemini-password.date/password","https://www.zoom-login.date/login","http://sp0ct0-xolmer-biz-trevik-nasqu.pages.dev/","https://www.flickapply.live/","https://meituan-verify.000webhostapp.com/auth","http://silent-dust-b567.elymatldielwa4741.workers.dev/","http://adminveri.site/","https://pr070nm411-secure.com/account","https://22-abhi.github.io/netflix-clone-optimized","https://allbestads.com/sign-in?op_token=5uDn296H92rPrYiwWwnVlDb0IiLK7ooomlZ2wta8I5hKXL0TAfeyrNQHVVxsNnqUI685CK8Tp5eMnnT80p8pyweso7d3FJA6DPV&uuid=921eea32-fe6a-4445-9a13-bde8d63cc8e7&hash=2&language=en","https://haber7546.shop/auth","https://www.roblox.com.bn/users/937450666718/profile/","https://www.whatsapp-login.ga/login","https://cuuibase_prou_logi.godaddysites.com/","https://www.robiox.com.ps/users/6131704424/profile","https://shorturl.at/p4d4q2","https://goo.su/GzfuK","https://uyy1llu58dabcu0sgrym0k4ho69kp.country/login","http://pulihkan-akun-78u.pages.dev/","https://www.amazon-login.accountant/login","https://electoral-plum-x813sremvw.edgeone.app/","http://harshkeni.github.io/instagram_login_page_clone/","https://weixin-verify.trade/signin","https://5blnr8uw5htqd2e2e1rr2datsvpe.win/login","http://pro_coinbaslogin-io.godaddysites.com/","https://www.paypal-login.date/login","http://www.vdhedheb-etws.vercel.app/","https://canva-verify.weebly.com/auth","https://atlassian-verify.xyz/signin","https://7a648xwq4refuqbvuyra.faith/login","https://t.co/8x06cttdn","http://bafkreiawo4tjsyxl3iviikfjzfd2b66wkhmmr2zrmr3yfsqf75iyxzkj7e.ipfs.dweb.link/","https://weibo.com.login.verify.download/","https://tiktok-unlock.cf/unlock","http://fortex.life/","http://www.netflixy-bixy.vercel.app/","https://coinbase-verify.country/signin","https://notion-secure.replit.app/login","https://mqpqih9nteu5m0e3odtcb5zcvv.party/login","https://www.zoom-login.win/login","https://tinyurl.com/msew96vd","https://www.m374m45k.com/login","https://account.gemini.secure.auth.cricket/login","https://netflix-service.men/verify","https://9xdbbexiuk3v9sef2ck.country/login","https://metamask-secure.strikingly.com/login","https://thecourierguydept.netlify.app/","https://epicgames-unlock.cf/unlock","http://quzixitizc.top/","https://quimtzzifnsdlje.byes3jbxhiyb.country/verify","https://opensea.com.login.verify.top/","https://www.71k70k.com/login","http://m.galabet-tr157.co/","https://www.pr070nm411.com/login","http://113.173.204.162/netflix/login","https://metamask-service.cf/verify","http://37.88.33.14/whatsapp/login","https://santafekllan2026.blogspot.com/","https://metamask.account.recover.gq/login","http://verificar--seguridad884.replit.app/","https://ph17vrp2qrqn482atgahbfvte769pvln.cricket/login","http://103.170.6.73/yahoo/login","https://figma-secure.netlify.app/login","https://meituan-verify.onrender.com/auth","https://www.bilibili-login.ml/login","https://account.steam.secure.auth.work/login","https://qq.com.login.verify.xyz/","http://143.23.11.7/qq/login","https://ramadabywyndhamdubaibarshaheights.spahotel.guru/","https://figma-secure.000webhostapp.com/login","https://kucoin-secure.firebaseapp.com/login","https://uber-secure.wordpress.com/login","https://www.popandc.be/wp-admin/js/cgi-ent/index--000","https://spotify.com.login.verify.accountant/","https://ellisgroupofma.info/PL-1466-160526/[email%C2%A0protected]","https://shanasyed.github.io/amazon-interface-clone/","http://97.165.134.23/spotify/login","https://www.7m411.com/login","http://gokul-unni93.github.io/Facebook-login-signup/","https://netflix-promo.faith/promo","http://74.68.247.26/discord/login","https://sp0ct0-surnex-biz-kavtri-molza.pages.dev/","https://enlacedecertificacionout.zya.me/","http://shopee1969.blogspot.com/","https://snapchat-reset.cf/reset","https://sp0ct0-pelnor-biz-vextar-jumli.pages.dev/","https://www.roblox.com.ml/games/17625359962/RIVALS?privateServerLinkCode=484343909447812736411458226588","https://cutt.ly/5v9x7m","http://www.adminveri-forn.shop/","https://twitch-verify.000webhostapp.com/auth","https://spotify-verify.replit.app/auth","https://nlink.at/pembatalan_dana_payLetter","https://paypal-c.vercel.app/","https://zoom-verify.win/signin","https://pancakeswap0.com/login","https://mussa-esliman.github.io/Responsive--Apple--Website-/","https://baidu-security.cf/security","http://terzor-io.gitlab.io/begin","https://www.zh1hu.com/login","https://hyperliquid-verify.godaddysites.com/auth","https://pinterest-airdrop.accountant/airdrop","http://197.147.70.22:5000/login","https://bybit-verify.faith/signin","https://sp10ct6-qurnik-biz-glarnex-fratem.pages.dev/","https://l858sfpbaakhsvikp0yy3ncol.stream/login","http://121.192.42.1:8443/login","https://sgzimqfemdl.hjr1ve9lu.download/verify","https://tiktok-validate.wixsite.com/claim","https://atlassian-verify.ga/signin","http://180.37.34.179:9000/login","https://phantom0.com/login","https://goshenmedia.co.ls/.well-known/axa.ch-26/axa.ch-ba/axa.ch/login.php","https://bilibili-safe.com/login?token=%0f%ab%dd%b0%c6%78%3a%77%32%63","https://sundancecabinetdesign.com/wp/docusign/me/Mac/utility.php/download/index.php/","https://mrtm-ywoc-dm31.rdials-compasslabservices-com-s-account.workers.dev/bedd06f2464a0b8f?email=","http://informacion-034--validar2901.replit.app/","https://sp10ct6-dravtem-biz-vrolnik-qarnex.pages.dev/","https://u83r-secure.com/account","http://adorable-gelato-921c2a.netlify.app/","https://shopeebig777.blogspot.com/","https://gmail-verify.cf/signin","https://www.google-login.bid/login","https://telegram.com.login.verify.win/","https://account.baidu.secure.auth.racing/login","https://www.metamask-login.accountant/login","http://cordialcertmain.wasmer.app/mobile","https://97ee5.catex.at/cnbcard/signin.php","https://alipay.com.login.verify.review/","https://www.amazonpk-clone.vercel.app/","https://inlnk.co/VHjVN","https://ymuthfiktu.8cj467gus.top/verify","https://www.apple-login.ga/login","https://i6n8uqdrcbopffmwnh0kxq09ieo8.work/login","https://okx-secure.railway.app/login","https://coinbase-access.accountant/access","https://taobao.com.login.verify.top/","https://e80q935rxo5z280xvhupsvmz0a3.ga/login","https://mrluwas25.bubbleapps.io/version-test/111","https://baidu-claim.country/claim","http://tr.galabet-guncelaff.icu/","https://kraken-verify.bid/signin","http://ipfs.io/ipfs/bafkreifv37eslxve3wyn5mhawtr2op3mtprilk6lxtiljx3ilhodb6bdzm?eta=kelen2@bad5eba767ad2a60109156ff453f4f902dd9.com","https://www.y4h00.com/login","https://microsoft.account.recover.racing/login","https://m.yh87755.com/","https://okxv.net/verify","https://dmcefadhuxzpk.vpnwo9ei3ww.faith/verify","https://shorturl.at/lgnfcz5","http://resarch.markusscholz.info/ga/click/2-9798776-10-8494-16604-9112-17afc9ad5f-f5e7bc8c21","https://jd0.com/login","https://google.account.recover.stream/login","https://secure-trezo-ai.zapier.app/help","https://non-steam.com/","https://www.0ff1c3365.com/login","https://facebook.account.recover.ga/login","https://atlassian-gift.fly.dev/access","https://www.sqs.non-steam.com/","https://trustwallet.com.login.verify.date/","http://90.232.111.26:8443/login","http://www.roblox.com.ge/login/","https://www.4pp13.com/login","https://hyperliquid-secure.netlify.app/login","https://haber7546.shop/","https://coinbase-service.top/verify","https://kucoin-secure.wixsite.com/login","http://sp5ct6-fralqor-biz-vrontek-plamnix.pages.dev/","https://account.alipay.secure.auth.click/login","https://kraken-verify.ga/signin","http://www.whatsaplusoriginal.com/","https://www.zhihu-login.bid/login","https://memnunpendcert.wasmer.app/","https://paypal-verify.download/signin","https://www.u83r.com/login","http://www.mmbxcdfg.vercel.app/","https://jd-recover.date/recover","http://72264.xyz/","https://goo.su/aG0zJ","https://www.slack-login.country/login","https://varnika6-hub.github.io/Amazon-Clone/","https://www.kqinbasepro_iogin.godaddysites.com/","http://sp1ct6-vromtek-biz-slortik-plarnix.pages.dev/","https://alipay.com.login.verify.click/","http://60.178.96.84:3000/login","https://reddit-verify.racing/signin","https://okx0.com/login","https://saraghrar.scholarlumni.info/ga/click/2-6663916-9-8697-16993-9319-d3294fcd8d-573e4f44d0","http://bafkreifjwfze2ce74zbj6xilrzf3wixlub5w7ixt2iofzkd72vtndj7c2a.ipfs.dweb.link/","https://zhihu-verify.loan/signin","https://coinbase_v_login.godaddysites.com/","https://githubv.net/verify","https://canva-verify.onrender.com/auth","https://netflixportal.com/l/eyJzIjoiNGY4OWFiNjItZjY5MS00ZTc5LWExZDQtMTJhNjQzYjE5MzE2IiwiZSI6ImIzOWU3YmFhLThlYmYtNDk0My04MzI0LTFmZmRiYTc5OTY3MSIsInNjIjoxMDYsInQiOjIzNn0.XVX_vDvuZb8x8XwZpqgQ3rD7mgDmexlhD26RisW8aD0","https://alibaba-wallet.review/wallet","https://docsonlineshare.hbhasnen.com/docsign/d0cs/Mac/utility.php/download/download/index.php","https://airbnb-safe.com/login?token=%c0%31%4e%5d%36%01%07%3c%91%55","https://aman365.com/","https://gemini.com.login.verify.cricket/","http://sp10ct6-qurnex-biz-slurnor-vrolax.pages.dev/","http://200.138.186.122:8443/login","https://www.81118111.com/login","https://vbtnculsnopwmv.8of65uqk.faith/verify","https://www.kuc01n.com/login","https://www.doeusignsafe.vercel.app/","https://lnk.ink/KLoo3","http://www.roblox.com.ml/users/386713055953/profile/","https://anttas.szm.sk/up/home.htm?fr2jp9yed0bg1b9dkaelargkxtzmpean6zq7qfk5c250ay2mj9","https://huobi-login-verify-secure.men/account/auth/signin?redirect=login","https://zoom0.com/login","https://www.fsyinglilai.com/","https://taobao-verify.party/signin","https://7m411-secure.com/account","https://www.tiktok-login.work/login","https://netflix-service.tk/verify","https://baidu.com.login.verify.cf/","https://devhouda.github.io/amazon-clone/checkout.html","https://d1d1-secure.com/account","https://sdgf9af72f31706769d32bf1ff66cdec1d1gkj5jg95jg5k0hkg95kg0tk.pages.dev/NHQ031202LETTER.pdf","http://bafkreifdr7lz6qv44cqosz75kwam7x6gta3izhq5vqxyyeharddpacresi.ipfs.dweb.link/","https://www.kucoin-login.top/login","https://ghanapoest.eu.cc/gh","https://lznzwxmhh.9gbmr4.bid/verify","http://100.106.79.25:5000/login","https://okx-login-verify-secure.cf/account/auth/signin?redirect=login","https://jd-reset.accountant/reset","https://okx-verify.work/signin","https://web-git-05-20-featwebshowread-onlytokeninfoforex-4642a4-uniswap.vercel.app/portfolio/nfts","https://post-support.co/pages/login.php","https://account.gemini.secure.auth.webcam/login","http://rdg.non-steam.com/","https://outconfiadd.webcindario.com/","https://antas.szm.sk/up/home.htm?knuzjyvrpclivcuiqwz3hopf9rerq2fnir3ghtmp8qz6psni6c","https://studentska-zadruga.ba/proctal/EN-G.html","https://okx-verify.tk/signin","https://phantom-verify.men/signin","https://allegrio.top/","https://microsoft-dashboard.ga/dashboard","https://slack-signin.win/signin","https://sp10ct6-qolnix-biz-vroltor-glantek.pages.dev/","https://www.paypal-login.download/login","https://shopify-login-verify-secure.ml/account/auth/signin?redirect=login","https://google-service.stream/verify","https://php-bf442ch.wasmer.app/login.php","https://account.kucoin.secure.auth.men/login","https://zoomv.net/verify","https://t-mobile.fgzxcn.top/pay/","https://wdmtogihk.h942idz96wd.gq/verify","https://facebook-service.bid/verify","https://www.roblox.com.bi/games/18365686347/shutting-down?privateServerLinkCode=76631489467056802943494992932880","https://amazon.account.recover.ml/login","https://vsilex.com/docusign/Windows/utility.php/download/index.php/","https://apple-verify.ga/signin","https://hyperliquid-secure.godaddysites.com/login","https://jk4lyyrssolzlg0xiiig8btd4sgbz9.accountant/login","https://canva-secure.onrender.com/login","https://amazon-verify.accountant/signin","https://casaluna.spahotel.guru/","http://www.microsoft-1ogin.duckdns.org/","https://steam.com.login.verify.bid/","https://notion-verify.replit.app/auth","https://trustwalletv.net/verify","https://twitch-secure.000webhostapp.com/login","https://t.co/mr6rzh","http://esl-org-claims2.lat/","https://apple-secure.000webhostapp.com/login","https://bnrldijugrojrb.q0sjdw306kiz.science/verify","https://cyr9z23855vb8ug4p952attb5.stream/login","http://sp10ct6-zolvik-biz-qarnex-platir.pages.dev/","https://fv-gigorder.forum/project/confirmation-order","https://amazon.account.recover.work/login","https://pgijrcloud.non-steam.com/","https://www.phantom-login.stream/login","https://www.zhihu-login.loan/login","https://www.7ru57w41137.com/login","http://h23u.top/","https://www.roblox.com.ml/users/203678123810/profile","https://kanuri-2006.github.io/Task-4-UI-Clone-Challenge/","https://17103.xyz/","https://airbnb-login-verify-secure.loan/account/auth/signin?redirect=login","https://swisspostrack.com/","https://rajsoull.github.io/Netflix-Clone/","https://global-package-tracking.vercel.app/","http://219.35.188.38:8443/login","https://www.d15c0rd.com/login","https://zhihu-winner.pages.dev/gift","http://madinirusufmain.wasmer.app/","https://www.google-login.accountant/login","http://136.224.67.45/tmall/login","http://129.179.7.119/opensea/login","https://bdovawvip.com/ph/personal/","https://thun2uwu3ez46f21kjk457zi.men/login","https://7dnclfcmajy9a11ulyiu6tfgbr7.cricket/login","https://www.invfn.live/id/login","https://spotify-secure.replit.app/login","http://official-exodas.wasmer.app/","https://www.reddit-login.racing/login","https://6jb8i53kpfr5rja2caltpgl8lrq.country/login","http://50.28.233.0:3000/login","https://www.m317u4n.com/login","https://www.bybit-login.faith/login","https://roblox-verify.bid/signin","https://adobe-verify.stream/signin","https://www.amazon-login.faith/login","http://coin-bse-app.zapier.app/","https://wilsongroup.in/Docusign/Mac/utility.php/download/index.php/","https://telegram-safe.com/login?token=%3f%8e%ba%a5%43%3e%9a%ff%81%18","http://en-taiyangcheng.com/","https://hu081-secure.com/account","http://ig.do/robloxcomusers-9469422-profile","https://hearingassociates.s3.nl-ams.scw.cloud/den.html","https://aclearplace.ch/PL-1466-160526/?u=97C1466&e=tomek%40elt.pl&s3=&s4=&s5=&s6=&s7=&s8=","https://reddit-verify.click/signin","https://meituan-secure.000webhostapp.com/login","https://lkulhpar.q6wl3my.tk/verify","https://www.roblox.com.ml/users/367449687354/profile","https://amazon-verify.faith/signin","https://account.alipay.secure.auth.review/login","https://account.telegram.secure.auth.download/login","https://dana-open-akun.pages.dev/","https://galaxysurabaya.com/","https://bybit-verify.vercel.app/auth","https://baidu.com.login.verify.racing/","https://account.adobe.secure.auth.date/login","http://149.73.171.106:9000/login","https://71k70k-secure.com/account","https://vxsct1811.avnam.net/ser/wordpress/wp-admin/includes/secr/Idsp3984762836","http://auth-wetrhug.xyz/","https://kallemmanasa07.github.io/UI-Clone-Challenge/","https://whatsapp-verify.bid/signin","https://posh-bet365.com.cn/","https://paypal-service.racing/verify","https://www.bilibili-login.accountant/login","http://www.cuuibase_prou_logi.godaddysites.com/","https://bilibili-verify.ml/signin","https://coinbase.account.recover.win/login","https://kkgcwdqumu784c79pb753k.webcam/login","https://dropbox-verify.country/signin","http://bafkreicgti5vthrvld3r7msmtanxoxgciool3sqmvgprctp5krdrehfcvu.ipfs.dweb.link/","https://redditv.net/verify","https://juarwoaut.0ggiujm.country/verify"],BN=["https://www.google.com","https://www.youtube.com","https://www.facebook.com","https://www.instagram.com","https://www.x.com","https://www.linkedin.com","https://www.microsoft.com","https://www.apple.com","https://www.amazon.com","https://www.github.com","https://www.stackoverflow.com","https://www.wikipedia.org","https://www.reddit.com","https://www.netflix.com","https://www.spotify.com","https://www.dropbox.com","https://www.cloudflare.com","https://www.mozilla.org","https://www.nytimes.com","https://www.bbc.com","https://www.baidu.com","https://www.taobao.com","https://www.jd.com","https://www.zhihu.com","https://www.bilibili.com","https://www.csdn.net","https://www.163.com","https://www.qq.com","https://www.sina.com.cn","https://www.sohu.com","https://www.ebay.com","https://www.paypal.com","https://www.adobe.com","https://www.twitch.tv","https://www.salesforce.com","https://www.oracle.com","https://www.ibm.com","https://www.intel.com","https://www.cisco.com","https://www.nvidia.com","https://www.amd.com","https://www.bloomberg.com","https://www.reuters.com","https://www.cnn.com","https://www.theguardian.com","https://www.w3.org","https://www.npmjs.com","https://pypi.org","https://www.docker.com","https://www.gitlab.com","https://www.atlassian.com","https://www.figma.com","https://www.notion.so","https://www.slack.com","https://www.zoom.us","https://www.udemy.com","https://www.coursera.org","https://www.khanacademy.org","https://www.freecodecamp.org","https://www.harvard.edu","https://www.mit.edu","https://www.stanford.edu","https://www.nasa.gov","https://www.nih.gov","https://www.cdc.gov","https://www.who.int","https://www.un.org","https://www.worldbank.org","https://www.imf.org","https://www.nationalgeographic.com","https://www.nature.com","https://www.medium.com","https://www.quora.com","https://www.producthunt.com","https://www.techcrunch.com","https://www.wired.com","https://www.theverge.com","https://www.arstechnica.com","https://www.stackexchange.com","https://www.wikihow.com","https://www.hackerrank.com","https://www.leetcode.com","https://www.geeksforgeeks.org","https://www.codecademy.com","https://www.science.org","https://arxiv.org","https://www.ted.com","https://www.britannica.com","https://www.merriam-webster.com","https://www.imdb.com","https://www.rottentomatoes.com","https://www.goodreads.com","https://www.etsy.com","https://www.kickstarter.com","https://www.indeed.com","https://www.glassdoor.com","https://www.monster.com","https://www.zillow.com","https://www.webmd.com","https://www.mayoclinic.org"];
+var R=[],tst=false,stopped=false;
+
+function up(m){document.getElementById("status").textContent=m;console.log("[BlackBox]",m)}
+function clr(){R=[];document.getElementById("metrics").style.display="none";document.getElementById("resultsPanel").style.display="none";document.getElementById("btnExport").disabled=true;stopped=false}
+function showStop(){var b=document.getElementById("btnStop");b.style.display="inline-block";b.className="btn btn-sm stop-btn pulse"}
+function hideStop(){var b=document.getElementById("btnStop");b.style.display="none";b.className="btn btn-sm stop-btn"}
+
+function testPopupWindow(url, timeoutMs){
+  return new Promise(function(resolve){
+    var start = Date.now();
+    var w = window.open(url, "bb_probe", "width=600,height=500,left=100,top=100");
+    if(!w){resolve({blocked:false,method:"popup",reason:"popup_blocked_by_browser",ms:Date.now()-start});return}
+    var closed = false;
+    var iv = setInterval(function(){
+      if(w.closed){closed=true;clearInterval(iv);clearTimeout(tm);resolve({blocked:true,method:"popup",reason:"window_closed_by_extension",ms:Date.now()-start})}
+    },150);
+    var tm = setTimeout(function(){
+      clearInterval(iv);
+      try{if(!w.closed){w.close()}}catch(e){}
+      resolve({blocked:false,method:"popup",reason:closed?"detected_close":"timeout_no_action",ms:Date.now()-start})
+    }, timeoutMs);
+  });
+}
+
+function testWithIframe(url, timeoutMs){
+  return new Promise(function(resolve){
+    var start = Date.now();
+    var iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none";
+    iframe.sandbox = "allow-same-origin allow-scripts allow-forms";
+    var done = false;
+    function finish(result){if(done)return;done=true;clearTimeout(tm);try{if(iframe.parentNode)iframe.parentNode.removeChild(iframe)}catch(e){}resolve(result)}
+    iframe.onload = function(){finish({blocked:false,method:"iframe",reason:"loaded_successfully",ms:Date.now()-start})};
+    iframe.onerror = function(){finish({blocked:true,method:"iframe",reason:"load_error",ms:Date.now()-start})};
+    var tm = setTimeout(function(){finish({blocked:true,method:"iframe",reason:"timeout",ms:Date.now()-start})}, timeoutMs);
+    document.body.appendChild(iframe);
+    try{iframe.src = url}catch(e){finish({blocked:true,method:"iframe",reason:"src_error",ms:Date.now()-start})}
+  });
+}
+
+async function testOne(url, label, method, timeoutMs){
+  var result;
+  if(method === "popup"){result = await testPopupWindow(url, timeoutMs)}
+  else{result = await testWithIframe(url, timeoutMs)}
+  result.url = url; result.label = label; return result;
+}
+
+async function runBatch(urls, method, timeoutMs){
+  R = []; var total = urls.length;
+  for(var i = 0; i < total; i++){
+    if(stopped){up("Stopped at " + i + "/" + total);hideStop();tst=false;return}
+    up("[" + (i+1) + "/" + total + "] " + (method==="popup"?"Popup":"Iframe") + " probing: " + urls[i].url.substring(0,60) + "...");
+    var r = await testOne(urls[i].url, urls[i].label, method, timeoutMs);
+    r.idx = i + 1; R.push(r);
+    if(i % 10 === 0 || i === total - 1){var s = calc(R); rS(s); rR(R)}
+  }
+  up("Done: " + R.length + " URLs tested"); hideStop(); tst = false;
+}
+
+function calc(R){
+  var tp=0,fp=0,tn=0,fn=0;
+  for(var i=0;i<R.length;i++){
+    var r=R[i];
+    var isPhish = r.label === "phishing";
+    var isBlocked = r.blocked;
+    if(isBlocked && isPhish) tp++;
+    else if(isBlocked && !isPhish) fp++;
+    else if(!isBlocked && !isPhish) tn++;
+    else if(!isBlocked && isPhish) fn++;
+  }
+  var total = tp+fp+tn+fn;
+  var dr = tp+fn>0 ? Math.round(tp/(tp+fn)*100) : 0;
+  var fpr = fp+tn>0 ? Math.round(fp/(fp+tn)*100) : 0;
+  var pr = tp+fp>0 ? Math.round(tp/(tp+fp)*100) : 0;
+  var rc = tp+fn>0 ? Math.round(tp/(tp+fn)*100) : 0;
+  var acc = total>0 ? Math.round((tp+tn)/total*100) : 0;
+  var f1 = pr+rc>0 ? Math.round(2*pr*rc/(pr+rc)) : 0;
+  return {total:total,tp:tp,fp:fp,tn:tn,fn:fn,dr:dr,fpr:fpr,acc:acc,f1:f1,prec:pr,rec:rc};
+}
+
+function rS(s){
+  document.getElementById("metrics").style.display="grid";
+  document.getElementById("mTotal").textContent=s.total;
+  document.getElementById("mDR").textContent=s.dr+"%";
+  document.getElementById("mFPR").textContent=s.fpr+"%";
+  document.getElementById("mF1").textContent=s.f1+"%";
+  document.getElementById("mAcc").textContent=s.acc+"%";
+}
+
+function gV(r){
+  if(r.label==="phishing"){return r.blocked?["TP","bg-tp"]:["FN","bg-fn"]}
+  else{return r.blocked?["FP","bg-fp"]:["TN","bg-tn"]}
+}
+
+function rR(R){
+  document.getElementById("resultsPanel").style.display="block";
+  document.getElementById("btnExport").disabled=false;
+  var h="";
+  for(var i=R.length-1;i>=Math.max(0,R.length-100);i--){
+    var r=R[i],v=gV(r);
+    var rb=r.blocked?'<span class="badge bg-bl">BLOCKED</span>':'<span class="badge bg-ps">PASSED</span>';
+    var urlEscaped = r.url.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+    h="<tr><td>"+(r.idx||i+1)+"</td><td title=\""+urlEscaped+"\">"+r.url.substring(0,80)+"</td><td>"+r.label+"</td><td>"+r.method+"</td><td>"+rb+"</td><td><span class=\'badge "+v[1]+"\'>"+v[0]+"</span></td><td>"+r.ms+"ms</td></tr>"+h;
+  }
+  document.getElementById("resultsBody").innerHTML=h;
+}
+
+async function fetchAndTest(method, timeoutMs, source){
+  if(tst){up("Already testing");return}
+  tst=true;clr();showStop();
+  up("Fetching from " + source + "...");
+  try{
+    var url = source==="openphish"?"https://api.allorigins.win/raw?url="+encodeURIComponent("https://openphish.com/feed.txt"):"https://api.allorigins.win/raw?url="+encodeURIComponent("https://data.phishtank.com/data/online-valid.json");
+    var resp = await fetch(url);
+    var data;
+    if(source==="openphish"){
+      var txt = await resp.text();
+      data = txt.split("\n").map(function(l){return l.trim()}).filter(function(l){return l.indexOf("http")===0});
+    }else{
+      var json = await resp.json();
+      data = (json||[]).map(function(e){return e.url}).filter(Boolean);
+    }
+    up("Fetched " + data.length + " URLs from " + source);
+    var list=[];
+    for(var i=0;i<Math.min(data.length,200);i++)list.push({url:data[i],label:"phishing"});
+    for(var i=0;i<Math.min(BN.length,30);i++)list.push({url:BN[i],label:"benign"});
+    await runBatch(list, method, timeoutMs);
+  }catch(e){up(source+" fetch failed: "+e.message);hideStop();tst=false}
+}
+
+async function popupTest(){
+  if(tst){up("Already testing");return}
+  tst=true;clr();showStop();
+  var list=[];
+  for(var i=0;i<PH.length;i++)list.push({url:PH[i],label:"phishing"});
+  for(var i=0;i<BN.length;i++)list.push({url:BN[i],label:"benign"});
+  up("Starting Popup Probe: " + list.length + " URLs. First click needed for popup permission.");
+  var to = parseInt(document.getElementById("timeout").value)||3000;
+  await runBatch(list, "popup", to);
+}
+
+async function iframeTest(){
+  if(tst){up("Already testing");return}
+  tst=true;clr();showStop();
+  var list=[];
+  for(var i=0;i<PH.length;i++)list.push({url:PH[i],label:"phishing"});
+  for(var i=0;i<BN.length;i++)list.push({url:BN[i],label:"benign"});
+  var to = parseInt(document.getElementById("timeout").value)||3000;
+  up("Starting Iframe Probe: " + list.length + " URLs");
+  await runBatch(list, "iframe", to);
+}
+
+async function manualTest(){
+  if(tst)return;
+  var t=document.getElementById("manualUrls").value.trim();
+  if(!t){up("Paste URLs first");return}
+  tst=true;clr();showStop();
+  var lines=t.split("\n"),ph=[],bn=[],cu="phishing";
+  for(var i=0;i<lines.length;i++){
+    var l=lines[i].trim();if(!l)continue;
+    if(l.toLowerCase()==="#benign"||l.toLowerCase()==="#safe"){cu="benign";continue}
+    if(l.toLowerCase()==="#phishing"){cu="phishing";continue}
+    if(l.indexOf("http")===0){if(cu==="benign")bn.push(l);else ph.push(l)}
+  }
+  var list=[];
+  for(var i=0;i<ph.length;i++)list.push({url:ph[i],label:"phishing"});
+  for(var i=0;i<bn.length;i++)list.push({url:bn[i],label:"benign"});
+  if(list.length===0){up("No valid URLs");tst=false;hideStop();return}
+  var m = document.getElementById("method").value;
+  var to = parseInt(document.getElementById("timeout").value)||3000;
+  await runBatch(list, m, to);
+}
+
+function eC(){
+  if(!R.length){up("No results");return}
+  var c="idx,url,label,method,blocked,verdict,time_ms\n";
+  for(var i=0;i<R.length;i++){
+    var r=R[i],v=gV(r);
+    c+=[r.idx||i+1,'"'+r.url.replace(/"/g,'""')+'"',r.label,r.method,r.blocked?"YES":"NO",v[0],r.ms].join(",")+"\n";
+  }
+  var b=new Blob([c],{type:"text/csv"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(b);
+  a.download="blackbox-test-"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();up("CSV exported");
+}
+
+// INIT
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("btnPopup").addEventListener("click",popupTest);
+  document.getElementById("btnIframe").addEventListener("click",iframeTest);
+  document.getElementById("btnClear").addEventListener("click",function(){stopped=true;tst=false;R=[];clr();hideStop();up("Cleared")});
+  document.getElementById("btnStop").addEventListener("click",function(){stopped=true;up("Stopping...");hideStop()});
+  document.getElementById("btnManual").addEventListener("click",function(){var s=document.getElementById("manualSection");s.style.display=s.style.display==="none"?"block":"none"});
+  document.getElementById("btnRunManual").addEventListener("click",manualTest);
+  document.getElementById("btnFetch").addEventListener("click",function(){var m=document.getElementById("method").value;var to=parseInt(document.getElementById("timeout").value)||3000;fetchAndTest(m,to,"openphish")});
+  document.getElementById("btnPT").addEventListener("click",function(){var m=document.getElementById("method").value;var to=parseInt(document.getElementById("timeout").value)||3000;fetchAndTest(m,to,"phishtank")});
+  document.getElementById("btnExport").addEventListener("click",eC);
+  document.getElementById("btnLoadFile").addEventListener("click",function(){document.getElementById("fileInput").click()});
+  document.getElementById("fileInput").addEventListener("change",function(){var f=this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(e){document.getElementById("manualUrls").value=e.target.result};rd.readAsText(f)});
+  up("Ready - " + PH.length + " phishing + " + BN.length + " benign = " + (PH.length+BN.length) + " URLs | Black-Box Mode | Tests ANY extension");
+  console.log("[BlackBox] Init. Ph:",PH.length,"Bn:",BN.length,"Total:",PH.length+BN.length);
+});
+
+</script>
+</body>
+</html>
